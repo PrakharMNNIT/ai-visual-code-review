@@ -2,6 +2,21 @@ const request = require('supertest');
 const app = require('../server');
 
 describe('AI Visual Code Review Server', () => {
+  beforeEach(() => {
+    // Reset rate limiting before each test
+    if (app.resetRateLimit) {
+      app.resetRateLimit();
+    }
+    // Set NODE_ENV to test to ensure proper test behavior
+    process.env.NODE_ENV = 'test';
+  });
+
+  afterEach(() => {
+    // Clean up after each test
+    if (app.resetRateLimit) {
+      app.resetRateLimit();
+    }
+  });
   describe('Health Check', () => {
     test('GET /api/health should return server status', async () => {
       const response = await request(app)
@@ -170,6 +185,11 @@ describe('AI Visual Code Review Server', () => {
 
   describe('Rate Limiting', () => {
     test('Should apply rate limits to export endpoints', async () => {
+      // Reset rate limit first
+      if (app.resetRateLimit) {
+        app.resetRateLimit();
+      }
+
       const promises = [];
 
       // Send 15 requests quickly (more than the limit of 10)
@@ -216,9 +236,10 @@ describe('AI Visual Code Review Server', () => {
 
       const response = await request(app)
         .get('/api/file-diff')
-        .query({ file: 'non-existent-file.js' })
-        .expect(400);
+        .query({ file: 'non-existent-file.js' });
 
+      // Should return 400 for invalid files
+      expect(response.status).toBe(400);
       expect(response.body.error).not.toContain('Internal server error');
 
       // Restore original NODE_ENV

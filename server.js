@@ -35,11 +35,12 @@ const createRateLimit = (maxRequests, windowMs) => {
   return (req, res, next) => {
     const ip = req.ip || req.connection.remoteAddress || 'unknown';
 
-    // Skip rate limiting for localhost during development
+    // Skip rate limiting for localhost during development, but not during testing
     const isLocalhost = ip === '::1' || ip === '127.0.0.1' || ip === 'localhost' || ip?.startsWith('::ffff:127.0.0.1');
     const isDevelopment = process.env.NODE_ENV !== 'production';
+    const isTesting = process.env.NODE_ENV === 'test';
 
-    if (isLocalhost && isDevelopment) {
+    if (isLocalhost && isDevelopment && !isTesting) {
       console.log(`💨 Rate limiting bypassed for localhost: ${req.method} ${req.path}`);
       return next();
     }
@@ -374,6 +375,16 @@ app.get('/api/file-diff', handleAsyncRoute(async (req, res) => {
 
   try {
     const diff = await executeGitCommand('diff-cached', ['--', file]);
+
+    // If no diff content, the file doesn't exist or has no changes
+    if (!diff || diff.trim().length === 0) {
+      return res.status(400).json({
+        error: 'File not found in staged changes',
+        file,
+        timestamp: new Date().toISOString()
+      });
+    }
+
     const parsedDiff = DiffService.parseDiff(diff);
 
     res.json({
@@ -385,8 +396,13 @@ app.get('/api/file-diff', handleAsyncRoute(async (req, res) => {
     });
   } catch (error) {
     console.error(`Error getting diff for file ${file}:`, error);
-    res.status(500).json({
-      error: 'Failed to get file diff',
+
+    // Don't expose internal errors in production
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    const errorMessage = isDevelopment ? error.message : 'File not found or inaccessible';
+
+    res.status(400).json({
+      error: errorMessage,
       file,
       timestamp: new Date().toISOString()
     });
@@ -936,26 +952,43 @@ app.get('/', (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log('🔍 AI Visual Code Review Server');
-  console.log('===============================');
-  console.log(`🌐 Server running at: http://localhost:${PORT}`);
-  console.log(`📁 Working directory: ${process.cwd()}`);
-  console.log(`⏰ Started at: ${new Date().toLocaleString()}`);
-  console.log('');
-  console.log('📋 Available endpoints:');
-  console.log('   GET  /                     - Visual review interface');
-  console.log('   GET  /api/health          - Repository status');
-  console.log('   GET  /api/summary         - Change statistics');
-  console.log('   GET  /api/staged-files    - List of staged files');
-  console.log('   POST /api/export-for-ai   - Generate AI review');
-  console.log('');
-  console.log('💡 Usage:');
-  console.log('   1. Stage changes: git add .');
-  console.log('   2. Open: http://localhost:3002');
-  console.log('   3. Review and export for AI analysis');
-  console.log('');
+// 404 handler for non-existent routes
+app.use('*', (req, res) => {
+  res.status(404).json({
+    error: 'Not found',
+    path: req.originalUrl,
+    method: req.method,
+    timestamp: new Date().toISOString()
+  });
 });
+
+// Start server only if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log('🔍 AI Visual Code Review Server');
+    console.log('===============================');
+    console.log(`🌐 Server running at: http://localhost:${PORT}`);
+    console.log(`📁 Working directory: ${process.cwd()}`);
+    console.log(`⏰ Started at: ${new Date().toLocaleString()}`);
+    console.log('');
+    console.log('📋 Available endpoints:');
+    console.log('   GET  /                     - Visual review interface');
+    console.log('   GET  /api/health          - Repository status');
+    console.log('   GET  /api/summary         - Change statistics');
+    console.log('   GET  /api/staged-files    - List of staged files');
+    console.log('   POST /api/export-for-ai   - Generate AI review');
+    console.log('');
+    console.log('💡 Usage:');
+    console.log('   1. Stage changes: git add .');
+    console.log('   2. Open: http://localhost:3002');
+    console.log('   3. Review and export for AI analysis');
+    console.log('');
+  });
+}
+
+// Add a function to reset rate limiting for tests
+app.resetRateLimit = () => {
+  rateLimitStore.clear();
+};
 
 module.exports = app;

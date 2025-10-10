@@ -105,15 +105,15 @@ class DiffService {
       const enhancedDiff = this.formatEnhancedDiff(parsedDiff);
 
       if (enhancedDiff) {
-        return `\`\`\`diff\n${enhancedDiff}\`\`\`\n\n`;
+        return `\`\`\`diff\n${enhancedDiff}\n\`\`\`\n\n`;
       } else {
         // Fallback to standard diff if parsing fails
-        return `\`\`\`diff\n${diff}\`\`\`\n\n`;
+        return `\`\`\`diff\n${diff}\n\`\`\`\n\n`;
       }
     } catch (error) {
       console.error('Error formatting diff:', error);
       // Safe fallback to standard diff
-      return `\`\`\`diff\n${diff}\`\`\`\n\n`;
+      return `\`\`\`diff\n${diff}\n\`\`\`\n\n`;
     }
   }
 
@@ -132,9 +132,24 @@ class DiffService {
       return false;
     }
 
+    // Prevent dangerous characters that could be used for command injection
+    const dangerousChars = /[;&|`$(){}[\]<>]/;
+    if (dangerousChars.test(filePath)) {
+      return false;
+    }
+
     // Prevent access to hidden files and sensitive directories
     const sensitivePatterns = ['.env', '.git/', 'node_modules/', '.ssh/', '.aws/'];
-    return !sensitivePatterns.some(pattern => filePath.includes(pattern));
+    if (sensitivePatterns.some(pattern => filePath.includes(pattern))) {
+      return false;
+    }
+
+    // Additional checks for script tags and other XSS attempts
+    if (filePath.toLowerCase().includes('<script>')) {
+      return false;
+    }
+
+    return true;
   }
 }
 
