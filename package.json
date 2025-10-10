@@ -1,6 +1,6 @@
 {
   "name": "ai-visual-code-review",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A comprehensive visual code review system with AI integration for any Git repository",
   "main": "server.js",
   "bin": {
@@ -49,8 +49,14 @@
       "!coverage/**",
       "!test/**"
     ],
-    "coverageReporters": ["text", "lcov", "html"],
-    "testMatch": ["**/test/**/*.test.js"]
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ],
+    "testMatch": [
+      "**/test/**/*.test.js"
+    ]
   },
   "engines": {
     "node": ">=14.0.0"
