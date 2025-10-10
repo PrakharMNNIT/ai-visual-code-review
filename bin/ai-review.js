@@ -26,7 +26,7 @@ Examples:
   ai-review quick              # Quick markdown generation
   ai-review --help             # Show help
 
-Repository: https://github.com/ai-tools/ai-visual-code-review
+Repository: https://github.com/PrakharMNNIT/ai-visual-code-review
   `);
 }
 

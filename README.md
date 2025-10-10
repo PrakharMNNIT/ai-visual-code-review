@@ -5,8 +5,8 @@ A **production-ready**, comprehensive visual code review system with AI integrat
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-14%2B-green.svg)](https://nodejs.org/)
 [![Git](https://img.shields.io/badge/Git-Required-orange.svg)](https://git-scm.com/)
-[![Security](https://img.shields.io/badge/Security-Hardened-red.svg)](https://github.com/ai-tools/ai-visual-code-review)
-[![Tests](https://img.shields.io/badge/Tests-Comprehensive-brightgreen.svg)](https://github.com/ai-tools/ai-visual-code-review)
+[![Security](https://img.shields.io/badge/Security-Hardened-red.svg)](https://github.com/PrakharMNNIT/ai-visual-code-review)
+[![Tests](https://img.shields.io/badge/Tests-Comprehensive-brightgreen.svg)](https://github.com/PrakharMNNIT/ai-visual-code-review)
 
 ## 🚀 **What's New in v2.0**
 
@@ -63,7 +63,7 @@ A **production-ready**, comprehensive visual code review system with AI integrat
 
 ```bash
 # Clone and install
-git clone https://github.com/ai-tools/ai-visual-code-review.git
+git clone https://github.com/PrakharMNNIT/ai-visual-code-review.git
 cd ai-visual-code-review
 chmod +x install.sh
 ./install.sh --global
@@ -79,7 +79,7 @@ npm install -g ai-visual-code-review
 
 ```bash
 # Clone repository
-git clone https://github.com/ai-tools/ai-visual-code-review.git
+git clone https://github.com/PrakharMNNIT/ai-visual-code-review.git
 cd ai-visual-code-review
 
 # Install dependencies
@@ -329,7 +329,7 @@ The system provides specialized analysis for:
 
 ```bash
 # Clone and setup
-git clone https://github.com/ai-tools/ai-visual-code-review.git
+git clone https://github.com/PrakharMNNIT/ai-visual-code-review.git
 cd ai-visual-code-review
 npm install
 
@@ -545,4 +545,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Happy Reviewing!** 🔍✨
 
-For more information, visit: https://github.com/ai-tools/ai-visual-code-review
+For more information, visit: https://github.com/PrakharMNNIT/ai-visual-code-review

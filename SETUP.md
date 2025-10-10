@@ -38,7 +38,7 @@ git --version     # Should show 2.0.0 or higher
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ai-tools/ai-visual-code-review.git
+git clone https://github.com/PrakharMNNIT/ai-visual-code-review.git
 cd ai-visual-code-review
 
 # 2. Install dependencies
@@ -68,7 +68,7 @@ ai-review --help
 
 ```bash
 # 1. Clone for development
-git clone https://github.com/ai-tools/ai-visual-code-review.git
+git clone https://github.com/PrakharMNNIT/ai-visual-code-review.git
 cd ai-visual-code-review
 
 # 2. Install dependencies including dev dependencies
@@ -678,7 +678,7 @@ NODE_ENV=development ai-review
 
 ### Reporting Issues
 
-1. **Check existing issues**: [GitHub Issues](https://github.com/ai-tools/ai-visual-code-review/issues)
+1. **Check existing issues**: [GitHub Issues](https://github.com/PrakharMNNIT/ai-visual-code-review/issues)
 2. **Provide information**:
    - Operating system and version
    - Node.js and npm versions
@@ -695,8 +695,8 @@ NODE_ENV=development ai-review
 - **Documentation**: [README.md](README.md)
 - **Security**: [SECURITY.md](SECURITY.md)
 - **Changes**: [CHANGELOG.md](CHANGELOG.md)
-- **Issues**: [GitHub Issues](https://github.com/ai-tools/ai-visual-code-review/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/ai-tools/ai-visual-code-review/discussions)
+- **Issues**: [GitHub Issues](https://github.com/PrakharMNNIT/ai-visual-code-review/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/PrakharMNNIT/ai-visual-code-review/discussions)
 
 ---
 
