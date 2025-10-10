@@ -1,0 +1,44 @@
+{
+  "name": "ai-visual-code-review",
+  "version": "1.0.0",
+  "description": "A comprehensive visual code review system with AI integration for any Git repository",
+  "main": "server.js",
+  "bin": {
+    "ai-review": "./bin/ai-review.js",
+    "quick-ai-review": "./scripts/quick-ai-review.sh"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "review": "node server.js",
+    "quick": "./scripts/quick-ai-review.sh",
+    "install-global": "npm install -g .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "code-review",
+    "git",
+    "ai",
+    "visual",
+    "diff",
+    "github",
+    "development",
+    "quality"
+  ],
+  "author": "AI Code Review System",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ai-tools/ai-visual-code-review.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ai-tools/ai-visual-code-review/issues"
+  },
+  "homepage": "https://github.com/ai-tools/ai-visual-code-review#readme"
+}
