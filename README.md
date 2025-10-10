@@ -1,34 +1,61 @@
-# 🔍 AI Visual Code Review
+# 🔍 AI Visual Code Review v2.0
 
-A comprehensive visual code review system with AI integration for any Git repository. Features beautiful GitHub-like interface, line-by-line commenting, and structured AI review exports.
+A **production-ready**, comprehensive visual code review system with AI integration for any Git repository. Features beautiful GitHub-like interface, line-by-line commenting, structured AI review exports, and enterprise-grade security.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-14%2B-green.svg)](https://nodejs.org/)
 [![Git](https://img.shields.io/badge/Git-Required-orange.svg)](https://git-scm.com/)
+[![Security](https://img.shields.io/badge/Security-Hardened-red.svg)](https://github.com/ai-tools/ai-visual-code-review)
+[![Tests](https://img.shields.io/badge/Tests-Comprehensive-brightgreen.svg)](https://github.com/ai-tools/ai-visual-code-review)
 
-## ✨ Features
+## 🚀 **What's New in v2.0**
+
+### 🔒 **Security Hardened**
+- **Command Injection Protection** - Secure Git command execution with allowlists
+- **Rate Limiting** - DoS protection with configurable limits
+- **Input Validation** - Comprehensive sanitization of all user inputs
+- **Security Headers** - CSP, XSS protection, and more
+- **Path Traversal Prevention** - Multiple layers of file path validation
+
+### ⚡ **Performance Enhanced**
+- **Async Operations** - Non-blocking Git operations with timeouts
+- **Memory Management** - Automatic cleanup prevents memory leaks
+- **Request Caching** - Smart caching for repeated requests
+- **Progressive Loading** - Better UX with lazy loading
+
+### 🎨 **UX Improvements**
+- **Smart Notifications** - Real-time feedback system
+- **Enhanced File Icons** - Better file type recognition
+- **Accessibility** - ARIA labels, keyboard navigation
+- **Error Recovery** - Graceful handling with retry options
+- **Loading States** - Clear progress indicators
+
+## ✨ Core Features
 
 ### Visual Review Interface
 - **GitHub-like Dark Theme** with professional styling
-- **Interactive Diff Viewer** with syntax highlighting
-- **Line-by-line Commenting** with templates and persistence  
-- **File Selection** for targeted reviews
-- **Real-time Git Status** monitoring
-- **Responsive Design** works on desktop and mobile
+- **Interactive Diff Viewer** with syntax highlighting and line numbers
+- **Line-by-line Commenting** with templates and persistence
+- **File Selection** with smart defaults and exclusion options
+- **Real-time Git Status** with actionable suggestions
+- **Responsive Design** optimized for desktop, tablet, and mobile
+- **Keyboard Navigation** full accessibility support
 
 ### AI Integration
 - **Structured Export** generates comprehensive review documents
 - **Multiple Export Formats** (unified or individual file reviews)
-- **Comprehensive Checklists** covering code quality, security, performance
+- **Enhanced Checklists** covering security, performance, accessibility
 - **Framework-aware Analysis** (React, TypeScript, Python, etc.)
-- **ChatGPT/Claude Ready** optimized markdown output
+- **ChatGPT/Claude Optimized** markdown output with metadata
+- **Error Tracking** detailed reporting of processing issues
 
 ### Developer Experience
-- **Zero Configuration** works with any Git repository
+- **Zero Configuration** works with any Git repository out of the box
 - **Multiple Access Methods** (CLI, web interface, quick scripts)
-- **Flexible File Filtering** include/exclude patterns
-- **Size Management** automatic handling of large files
+- **Flexible File Filtering** advanced include/exclude patterns
+- **Intelligent Size Management** automatic handling of large files
 - **Cross-platform** support (Windows, macOS, Linux)
+- **Development Mode** with hot reloading and debugging
 
 ## 🚀 Quick Start
 
@@ -296,7 +323,7 @@ The system provides specialized analysis for:
 - **Vue.js** - Composition API, reactivity patterns
 - **General** - Git best practices, documentation, testing
 
-## 🛠️ Development
+## 🛠️ Development & Testing
 
 ### Local Development
 
@@ -306,14 +333,37 @@ git clone https://github.com/ai-tools/ai-visual-code-review.git
 cd ai-visual-code-review
 npm install
 
-# Start development server
-npm start
-# or
-node server.js
+# Development with hot reload
+npm run dev
 
-# Run with auto-reload
-npm install -g nodemon
-nodemon server.js
+# Run tests
+npm test                    # Run all tests
+npm run test:watch         # Watch mode
+npm run test:coverage      # Coverage report
+npm run test:security      # Security audit
+
+# Production server
+npm start
+```
+
+### Testing Suite
+
+**Comprehensive test coverage includes:**
+- ✅ API endpoint testing with security validation
+- ✅ Git command injection prevention
+- ✅ Rate limiting functionality
+- ✅ Input sanitization and validation
+- ✅ Error handling and recovery
+- ✅ DiffService functionality
+- ✅ Security headers verification
+
+```bash
+# Run specific test suites
+npm test -- --testPathPattern=server.test.js
+npm test -- --testPathPattern=diffService.test.js
+
+# Generate coverage report
+npm run test:coverage
 ```
 
 ### Project Structure
@@ -321,34 +371,78 @@ nodemon server.js
 ```
 ai-visual-code-review/
 ├── bin/
-│   └── ai-review.js         # CLI entry point
+│   └── ai-review.js              # CLI entry point
 ├── public/
-│   └── index.html          # Web interface
+│   └── review.html              # Enhanced web interface
+├── services/
+│   └── diffService.js           # Git diff processing
 ├── scripts/
-│   └── quick-ai-review.sh  # Quick export script
-├── server.js               # Express server
-├── package.json           # Dependencies
-├── install.sh            # Installation script
-└── README.md            # Documentation
+│   └── quick-ai-review.sh       # Quick export script
+├── test/
+│   ├── server.test.js           # API endpoint tests
+│   ├── diffService.test.js      # Service tests
+│   ├── api-client.py            # Python test client
+│   ├── utils.js                 # Test utilities
+│   └── sample-component.tsx     # Test data
+├── server.js                    # Express server with security
+├── package.json                 # Dependencies & scripts
+├── install.sh                   # Installation script
+└── README.md                    # Documentation
 ```
 
-### API Endpoints
+### Enhanced API Endpoints
 
-- `GET /` - Web interface
-- `GET /api/health` - Repository status
-- `GET /api/summary` - Change statistics  
-- `GET /api/staged-files` - List staged files
-- `GET /api/file-diff?file=path` - File diff data
-- `POST /api/export-for-ai` - Generate AI review
+**Core Endpoints:**
+- `GET /` - Enhanced web interface with memory management
+- `GET /api/health` - Repository status with version info
+- `GET /api/summary` - Change statistics with caching
+- `GET /api/staged-files` - List staged files with metadata
+- `GET /api/file-diff?file=path` - Secure file diff data
+- `POST /api/log-comment` - Comment logging with validation
+- `POST /api/export-for-ai` - Generate AI review (rate limited)
 - `POST /api/export-individual-reviews` - Individual file reviews
 
-## 🔒 Security Considerations
+**Security Features:**
+- 🔒 Rate limiting on all endpoints
+- 🛡️ Input sanitization and validation
+- 🔐 Command injection prevention
+- 📊 Request/response logging
+- ⏱️ Configurable timeouts
 
-- **Production Safety**: Export functionality disabled in production
-- **Local Only**: Server binds to localhost by default
-- **No Remote Access**: Git operations limited to local repository
-- **Input Sanitization**: All file paths validated
-- **Process Isolation**: Git commands run with limited permissions
+## 🔒 Security Features
+
+### Multi-Layer Security Protection
+
+**Command Injection Prevention:**
+- ✅ Allowlisted Git commands only
+- ✅ Argument sanitization with regex filtering
+- ✅ Path traversal attack prevention
+- ✅ No shell metacharacters allowed
+
+**Input Validation:**
+- ✅ File path validation with security patterns
+- ✅ Request size limits (10MB default)
+- ✅ Comment length restrictions
+- ✅ Type checking on all inputs
+
+**Rate Limiting:**
+- ✅ 50 requests per 15 minutes (general)
+- ✅ 10 exports per 15 minutes (specific)
+- ✅ IP-based tracking
+- ✅ Configurable limits
+
+**Security Headers:**
+- ✅ Content Security Policy (CSP)
+- ✅ X-Frame-Options: DENY
+- ✅ X-Content-Type-Options: nosniff
+- ✅ X-XSS-Protection enabled
+- ✅ Referrer Policy configured
+
+**Production Hardening:**
+- ✅ Error details hidden in production
+- ✅ Sensitive data filtering in logs
+- ✅ CORS restrictions
+- ✅ Request timeout enforcement
 
 ## 🐛 Troubleshooting
 

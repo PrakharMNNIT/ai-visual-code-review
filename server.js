@@ -1,181 +1,519 @@
 #!/usr/bin/env node
 
 const express = require('express');
-const { execSync } = require('child_process');
-const { writeFileSync, readFileSync, existsSync } = require('fs');
+const { exec } = require('child_process');
+const { writeFileSync, readFileSync, existsSync, mkdirSync } = require('fs');
 const path = require('path');
 const cors = require('cors');
+const DiffService = require('./services/diffService');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Helper functions
-function executeGitCommand(command) {
-  try {
-    return execSync(command, {
-      encoding: 'utf-8',
-      cwd: process.cwd(),
-      stdio: ['pipe', 'pipe', 'ignore']
-    });
-  } catch (error) {
-    throw new Error(`Git command failed: ${command}`);
+// Configuration
+const CONFIG = {
+  server: {
+    port: PORT,
+    requestTimeout: 30000,
+    maxRequestSize: '10mb'
+  },
+  git: {
+    timeout: 15000,
+    maxFileSize: 10000
+  },
+  rateLimit: {
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 50, // 50 requests per window
+    exportMax: 10 // 10 exports per window
   }
-}
+};
 
-function parseDiff(diff) {
-  const lines = diff.split('\n');
-  const chunks = [];
-  let currentChunk = null;
-  let oldLineNum = 0;
-  let newLineNum = 0;
+// Rate limiting
+const rateLimitStore = new Map();
 
-  for (const line of lines) {
-    if (line.startsWith('@@')) {
-      // Parse chunk header: @@ -oldStart,oldCount +newStart,newCount @@
-      const match = line.match(/@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
-      if (match) {
-        oldLineNum = parseInt(match[1]);
-        newLineNum = parseInt(match[2]);
-        currentChunk = {
-          header: line,
-          lines: []
-        };
-        chunks.push(currentChunk);
-      }
-    } else if (currentChunk && !line.startsWith('---') && !line.startsWith('+++')) {
-      let type = 'context';
-      let oldNum = null;
-      let newNum = null;
+const createRateLimit = (maxRequests, windowMs) => {
+  return (req, res, next) => {
+    const ip = req.ip || req.connection.remoteAddress || 'unknown';
 
-      if (line.startsWith('+')) {
-        type = 'added';
-        newNum = newLineNum++;
-      } else if (line.startsWith('-')) {
-        type = 'removed';
-        oldNum = oldLineNum++;
-      } else {
-        type = 'context';
-        oldNum = oldLineNum++;
-        newNum = newLineNum++;
-      }
+    // Skip rate limiting for localhost during development
+    const isLocalhost = ip === '::1' || ip === '127.0.0.1' || ip === 'localhost' || ip?.startsWith('::ffff:127.0.0.1');
+    const isDevelopment = process.env.NODE_ENV !== 'production';
 
-      currentChunk.lines.push({
-        type,
-        content: line,
-        oldLineNum: oldNum,
-        newLineNum: newNum
+    if (isLocalhost && isDevelopment) {
+      console.log(`💨 Rate limiting bypassed for localhost: ${req.method} ${req.path}`);
+      return next();
+    }
+
+    const key = ip;
+    const now = Date.now();
+
+    if (!rateLimitStore.has(key)) {
+      rateLimitStore.set(key, []);
+    }
+
+    const requests = rateLimitStore.get(key);
+    // Clean old requests
+    const validRequests = requests.filter(time => now - time < windowMs);
+
+    if (validRequests.length >= maxRequests) {
+      console.warn(`🚫 Rate limit exceeded for ${ip}: ${validRequests.length}/${maxRequests} requests in ${windowMs/1000}s`);
+      return res.status(429).json({
+        error: 'Too many requests',
+        retryAfter: Math.ceil(windowMs / 1000),
+        current: validRequests.length,
+        limit: maxRequests,
+        windowSeconds: Math.ceil(windowMs / 1000)
       });
     }
+
+    validRequests.push(now);
+    rateLimitStore.set(key, validRequests);
+    next();
+  };
+};
+
+// Enhanced request logging with security monitoring
+const requestLogger = (req, res, next) => {
+  const timestamp = new Date().toISOString();
+  const ip = req.ip || req.connection.remoteAddress;
+
+  console.log(`${timestamp} - ${req.method} ${req.path} - IP: ${ip}`);
+
+  // Security monitoring for suspicious patterns (exclude localhost/development)
+  const isLocalhost = ip === '::1' || ip === '127.0.0.1' || ip === 'localhost' || ip?.startsWith('::ffff:127.0.0.1');
+
+  if (!isLocalhost || process.env.NODE_ENV === 'production') {
+    const suspiciousPatterns = [
+      /\.\.\//,        // Path traversal (more specific)
+      /[;&|`$()]/,     // Command injection characters
+      /<script[^>]*>/i, // XSS script tags
+      /javascript:/i,   // JavaScript protocol
+      /data:text\/html/i, // Data URI XSS
+      /vbscript:/i     // VBScript protocol
+    ];
+
+    const userAgent = req.get('User-Agent') || '';
+    const queryString = JSON.stringify(req.query);
+    const fullUrl = req.path + (req.query ? '?' + new URLSearchParams(req.query).toString() : '');
+
+    const suspiciousFound = suspiciousPatterns.some(pattern =>
+      pattern.test(fullUrl) ||
+      pattern.test(queryString) ||
+      pattern.test(userAgent)
+    );
+
+    if (suspiciousFound) {
+      console.warn(`🚨 SECURITY ALERT - Suspicious request from ${ip}: ${req.method} ${fullUrl}`);
+      console.warn(`   User-Agent: ${userAgent}`);
+      console.warn(`   Query: ${queryString}`);
+    }
   }
 
-  return { chunks };
+  next();
+};
+
+// Middleware
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? false : true,
+  credentials: false
+}));
+app.use(express.json({
+  limit: CONFIG.server.maxRequestSize,
+  strict: true
+}));
+app.use(requestLogger);
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Enhanced security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
+
+  // Add request timeout
+  req.setTimeout(CONFIG.server.requestTimeout, () => {
+    res.status(408).json({ error: 'Request timeout' });
+  });
+
+  next();
+});
+
+// Rate limiting middleware
+app.use(createRateLimit(CONFIG.rateLimit.max, CONFIG.rateLimit.windowMs));
+
+// Secure Git command execution
+const ALLOWED_GIT_COMMANDS = {
+  'diff-cached': ['git', 'diff', '--cached'],
+  'diff-cached-names': ['git', 'diff', '--cached', '--name-only'],
+  'diff-cached-stat': ['git', 'diff', '--cached', '--stat'],
+  'status-porcelain': ['git', 'status', '--porcelain']
+};
+
+async function executeGitCommand(commandType, args = []) {
+  return new Promise((resolve, reject) => {
+    const baseCommand = ALLOWED_GIT_COMMANDS[commandType];
+    if (!baseCommand) {
+      return reject(new Error(`Invalid git command type: ${commandType}`));
+    }
+
+    // Sanitize and validate arguments
+    const sanitizedArgs = args.filter(arg => {
+      if (typeof arg !== 'string') return false;
+      // Prevent command injection patterns
+      if (/[;&|`$(){}[\]\\]/.test(arg)) return false;
+      // Prevent path traversal (allow relative paths within repo)
+      if (arg.includes('..') && !arg.startsWith('./')) return false;
+      return true;
+    });
+
+    const command = [...baseCommand, ...sanitizedArgs].join(' ');
+
+    exec(command, {
+      encoding: 'utf-8',
+      cwd: process.cwd(),
+      timeout: CONFIG.git.timeout,
+      maxBuffer: 10 * 1024 * 1024 // 10MB buffer
+    }, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Git command failed: ${command}`, stderr);
+        reject(new Error(`Git operation failed: ${error.message}`));
+      } else {
+        resolve(stdout);
+      }
+    });
+  });
 }
 
-// API Routes
-app.get('/api/health', (req, res) => {
+// Enhanced input validation with comprehensive security checks
+function validateFileRequest(file) {
+  if (!file || typeof file !== 'string') {
+    return { valid: false, error: 'File parameter is required and must be a string' };
+  }
+
+  // Enhanced security validation
+  if (!DiffService.isValidFilePath(file)) {
+    return { valid: false, error: 'Invalid file path - potential security risk' };
+  }
+
+  // Additional checks for suspicious patterns
+  const suspiciousPatterns = [
+    /\x00/,           // Null bytes
+    /[<>"|*?]/,       // Dangerous file characters
+    /^\//,            // Absolute paths
+    /\.\.[\\/]/       // Path traversal
+  ];
+
+  if (suspiciousPatterns.some(pattern => pattern.test(file))) {
+    return { valid: false, error: 'File path contains invalid characters' };
+  }
+
+  return { valid: true };
+}
+
+function validateExportRequest(body) {
+  const { comments, lineComments, excludedFiles } = body || {};
+
+  // Validate request size
+  const bodySize = JSON.stringify(body).length;
+  if (bodySize > 5 * 1024 * 1024) { // 5MB limit
+    return { valid: false, error: 'Request payload too large' };
+  }
+
+  // Validate comments object with size limits
+  if (comments) {
+    if (typeof comments !== 'object' || Array.isArray(comments)) {
+      return { valid: false, error: 'Comments must be an object' };
+    }
+
+    const commentCount = Object.keys(comments).length;
+    if (commentCount > 100) {
+      return { valid: false, error: 'Too many file comments (max 100)' };
+    }
+
+    // Validate individual comments
+    for (const [file, comment] of Object.entries(comments)) {
+      if (typeof comment !== 'string' || comment.length > 10000) {
+        return { valid: false, error: 'Comment too long (max 10,000 characters)' };
+      }
+    }
+  }
+
+  // Validate lineComments object
+  if (lineComments) {
+    if (typeof lineComments !== 'object' || Array.isArray(lineComments)) {
+      return { valid: false, error: 'Line comments must be an object' };
+    }
+
+    if (Object.keys(lineComments).length > 500) {
+      return { valid: false, error: 'Too many line comments (max 500)' };
+    }
+  }
+
+  // Validate excludedFiles array
+  if (excludedFiles) {
+    if (!Array.isArray(excludedFiles)) {
+      return { valid: false, error: 'Excluded files must be an array' };
+    }
+
+    if (excludedFiles.length > 1000) {
+      return { valid: false, error: 'Too many excluded files (max 1000)' };
+    }
+
+    if (!excludedFiles.every(f => typeof f === 'string' && f.length < 500)) {
+      return { valid: false, error: 'Invalid excluded file entries' };
+    }
+  }
+
+  return { valid: true };
+}
+
+// Enhanced error handling
+function handleAsyncRoute(handler) {
+  return async (req, res, next) => {
+    try {
+      await handler(req, res, next);
+    } catch (error) {
+      console.error(`API Error in ${req.path}:`, error);
+
+      // Don't expose internal errors in production
+      const isDevelopment = process.env.NODE_ENV !== 'production';
+      const errorMessage = isDevelopment ? error.message : 'Internal server error';
+
+      res.status(500).json({
+        error: errorMessage,
+        timestamp: new Date().toISOString(),
+        path: req.path
+      });
+    }
+  };
+}
+
+// API Routes with async operations and better error handling
+app.get('/api/health', handleAsyncRoute(async (req, res) => {
+  let stagedCount = 0;
+  let unstagedCount = 0;
+
   try {
-    let stagedCount = 0;
-    let unstagedCount = 0;
+    const stagedFiles = await executeGitCommand('diff-cached-names');
+    stagedCount = stagedFiles.trim() ? stagedFiles.trim().split('\n').filter(f => f.length > 0).length : 0;
+  } catch (error) {
+    console.warn('Failed to get staged files count:', error.message);
+  }
 
-    try {
-      const stagedFiles = executeGitCommand('git diff --cached --name-only').trim();
-      stagedCount = stagedFiles ? stagedFiles.split('\n').filter(f => f.length > 0).length : 0;
-    } catch (error) {
-      // Ignore error
-    }
+  try {
+    const unstagedFiles = await executeGitCommand('status-porcelain');
+    const unstagedLines = unstagedFiles.trim().split('\n').filter(line =>
+      line.length > 0 && (line.startsWith(' M') || line.startsWith('??'))
+    );
+    unstagedCount = unstagedLines.length;
+  } catch (error) {
+    console.warn('Failed to get unstaged files count:', error.message);
+  }
 
-    try {
-      const unstagedFiles = executeGitCommand('git diff --name-only').trim();
-      unstagedCount = unstagedFiles ? unstagedFiles.split('\n').filter(f => f.length > 0).length : 0;
-    } catch (error) {
-      // Ignore error
-    }
+  const totalChanges = stagedCount + unstagedCount;
 
-    const totalChanges = stagedCount + unstagedCount;
+  res.json({
+    status: 'healthy',
+    stagedCount,
+    unstagedCount,
+    totalChanges,
+    timestamp: new Date().toISOString(),
+    cwd: process.cwd(),
+    version: '1.0.0'
+  });
+}));
 
+app.get('/api/summary', handleAsyncRoute(async (req, res) => {
+  try {
+    const stats = await executeGitCommand('diff-cached-stat');
     res.json({
-      status: 'healthy',
-      stagedCount,
-      unstagedCount,
-      totalChanges,
-      timestamp: new Date().toISOString(),
-      cwd: process.cwd()
+      stats: stats.trim(),
+      generated: new Date().toISOString()
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.warn('Failed to get diff stats:', error.message);
+    res.json({
+      stats: '',
+      error: 'No staged changes found'
+    });
   }
-});
+}));
 
-app.get('/api/summary', (req, res) => {
+app.get('/api/staged-files', handleAsyncRoute(async (req, res) => {
   try {
-    const stats = executeGitCommand('git diff --cached --stat').trim();
-    res.json({ stats });
+    const output = await executeGitCommand('diff-cached-names');
+    const files = output.trim() ? output.trim().split('\n').filter(f => f.length > 0) : [];
+
+    res.json({
+      files,
+      count: files.length,
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
-    res.json({ stats: '' });
+    console.warn('Failed to get staged files:', error.message);
+    res.json({
+      files: [],
+      count: 0,
+      error: 'No staged files found'
+    });
   }
-});
+}));
 
-app.get('/api/staged-files', (req, res) => {
-  try {
-    const output = executeGitCommand('git diff --cached --name-only').trim();
-    const files = output ? output.split('\n').filter(f => f.length > 0) : [];
-    res.json({ files });
-  } catch (error) {
-    res.json({ files: [] });
+app.get('/api/file-diff', handleAsyncRoute(async (req, res) => {
+  const { file } = req.query;
+  const validation = validateFileRequest(file);
+
+  if (!validation.valid) {
+    return res.status(400).json({
+      error: validation.error,
+      timestamp: new Date().toISOString()
+    });
   }
-});
 
-app.get('/api/file-diff', (req, res) => {
   try {
-    const { file } = req.query;
-    if (!file) {
-      return res.status(400).json({ error: 'File parameter required' });
-    }
-
-    const diff = executeGitCommand(`git diff --cached "${file}"`);
-    const parsedDiff = parseDiff(diff);
+    const diff = await executeGitCommand('diff-cached', ['--', file]);
+    const parsedDiff = DiffService.parseDiff(diff);
 
     res.json({
       diff,
       parsedDiff,
-      file
+      file,
+      timestamp: new Date().toISOString(),
+      size: diff.length
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(`Error getting diff for file ${file}:`, error);
+    res.status(500).json({
+      error: 'Failed to get file diff',
+      file,
+      timestamp: new Date().toISOString()
+    });
   }
-});
+}));
 
-app.post('/api/log-comment', (req, res) => {
-  try {
-    const { type, file, lineNumber, comment } = req.body;
-    console.log(`💬 ${type}: ${file}${lineNumber ? ` Line ${lineNumber}` : ''}: "${comment}"`);
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+// Simple request caching
+const requestCache = new Map();
+
+function getCacheKey(req) {
+  return `${req.method}:${req.path}:${JSON.stringify(req.query)}`;
+}
+
+function cacheMiddleware(ttlSeconds = 30) {
+  return (req, res, next) => {
+    if (req.method !== 'GET') return next();
+
+    const key = getCacheKey(req);
+    const cached = requestCache.get(key);
+
+    if (cached && (Date.now() - cached.timestamp) < (ttlSeconds * 1000)) {
+      console.log(`💨 Cache hit: ${key}`);
+      return res.json(cached.data);
+    }
+
+    // Override res.json to cache the response
+    const originalJson = res.json;
+    res.json = function(data) {
+      if (res.statusCode === 200) {
+        requestCache.set(key, {
+          data,
+          timestamp: Date.now()
+        });
+
+        // Clean old cache entries periodically
+        if (requestCache.size > 100) {
+          const now = Date.now();
+          for (const [k, v] of requestCache.entries()) {
+            if (now - v.timestamp > 300000) { // 5 minutes
+              requestCache.delete(k);
+            }
+          }
+        }
+      }
+      return originalJson.call(this, data);
+    };
+
+    next();
+  };
+}
+
+// Apply caching to GET routes
+app.use('/api/health', cacheMiddleware(10));
+app.use('/api/summary', cacheMiddleware(30));
+app.use('/api/staged-files', cacheMiddleware(15));
+
+app.post('/api/log-comment', handleAsyncRoute(async (req, res) => {
+  const { type, file, lineNumber, comment } = req.body;
+
+  // Validate input
+  if (!type || !file || !comment) {
+    return res.status(400).json({
+      success: false,
+      error: 'Missing required fields: type, file, and comment are required',
+      timestamp: new Date().toISOString()
+    });
   }
-});
 
-app.post('/api/export-for-ai', (req, res) => {
+  // Additional validation
+  if (typeof type !== 'string' || typeof file !== 'string' || typeof comment !== 'string') {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid field types: all fields must be strings',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Sanitize and limit log content
+  const sanitizedFile = file.replace(/[^\w\-_./]/g, '').substring(0, 100);
+  const sanitizedComment = comment.substring(0, 200);
+  const sanitizedType = type.replace(/[^\w\-_]/g, '').substring(0, 20);
+
+  console.log(`💬 ${sanitizedType}: ${sanitizedFile}${lineNumber ? ` Line ${lineNumber}` : ''}: "${sanitizedComment}"`);
+
+  res.json({
+    success: true,
+    timestamp: new Date().toISOString(),
+    logged: true
+  });
+}));
+
+// Export rate limiting - more restrictive
+const exportRateLimit = createRateLimit(CONFIG.rateLimit.exportMax, CONFIG.rateLimit.windowMs);
+
+app.post('/api/export-for-ai', exportRateLimit, handleAsyncRoute(async (req, res) => {
+  // Validate request body
+  const validation = validateExportRequest(req.body);
+  if (!validation.valid) {
+    return res.status(400).json({
+      success: false,
+      error: validation.error,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  const { comments = {}, lineComments = {}, excludedFiles = [] } = req.body;
+
+  console.log('🚀 Export for AI Review request received');
+  console.log('📋 Excluded files:', excludedFiles.length);
+  console.log('💬 File comments:', Object.keys(comments).length);
+  console.log('🔍 Line comments:', Object.keys(lineComments).length);
+
   try {
-    const { comments, lineComments, excludedFiles } = req.body;
-
-    console.log('🚀 Export for AI Review request received');
-    console.log('📋 Excluded files:', excludedFiles);
-    console.log('💬 File comments:', Object.keys(comments || {}).length);
-    console.log('🔍 Line comments:', Object.keys(lineComments || {}).length);
-
-    // Get all staged files
-    const stagedFiles = executeGitCommand('git diff --cached --name-only')
-      .trim()
-      .split('\n')
-      .filter(f => f.length > 0);
+    // Get all staged files with async operation
+    const stagedOutput = await executeGitCommand('diff-cached-names');
+    const stagedFiles = stagedOutput.trim() ?
+      stagedOutput.trim().split('\n').filter(f => f.length > 0) : [];
 
     console.log('📁 All staged files:', stagedFiles.length);
+
+    if (stagedFiles.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No staged files found. Please run "git add ." first.',
+        timestamp: new Date().toISOString()
+      });
+    }
 
     // Filter out excluded files
     const includedFiles = stagedFiles.filter(file => {
@@ -194,11 +532,12 @@ app.post('/api/export-for-ai', (req, res) => {
     let content = `# 🔍 Code Review - ${timestamp}
 
 **Project:** AI Visual Code Review
+**Generated by:** AI Visual Code Review v1.0.0
 
 ## 📊 Change Summary
 
 \`\`\`
-${executeGitCommand('git diff --cached --stat')}
+${await executeGitCommand('diff-cached-stat')}
 \`\`\`
 
 ## 📝 Files Changed (${includedFiles.length}/${stagedFiles.length} selected)
@@ -214,51 +553,46 @@ ${excludedFiles.map(f => `- \`${f}\``).join('\n')}
     }
 
     let processedCount = 0;
+    const errors = [];
 
-    // Process each included file
+    // Process each included file with better error handling
     for (const file of includedFiles) {
       try {
         console.log(`✅ Processing: ${file}`);
 
         content += `\n### 📄 \`${file}\`\n\n`;
 
-        // Add file type context
-        const ext = path.extname(file);
-        switch (ext) {
-          case '.tsx':
-          case '.ts':
-            content += '**Type:** TypeScript/React Component\n\n';
-            break;
-          case '.js':
-            content += '**Type:** JavaScript\n\n';
-            break;
-          case '.json':
-            content += '**Type:** Configuration/Data\n\n';
-            break;
-          case '.md':
-            content += '**Type:** Documentation\n\n';
-            break;
-          case '.css':
-            content += '**Type:** Stylesheet\n\n';
-            break;
-          default:
-            content += '**Type:** Source File\n\n';
-            break;
-        }
+        // Add file type context with enhanced detection
+        const ext = path.extname(file).toLowerCase();
+        const fileTypeMap = {
+          '.tsx': '**Type:** TypeScript React Component ⚛️\n\n',
+          '.ts': '**Type:** TypeScript Source File 📘\n\n',
+          '.js': '**Type:** JavaScript Source File 🟨\n\n',
+          '.jsx': '**Type:** React Component (JavaScript) ⚛️\n\n',
+          '.json': '**Type:** Configuration/Data File 📋\n\n',
+          '.md': '**Type:** Documentation 📖\n\n',
+          '.css': '**Type:** Stylesheet 🎨\n\n',
+          '.scss': '**Type:** Sass Stylesheet 🎨\n\n',
+          '.html': '**Type:** HTML Template 🌐\n\n',
+          '.py': '**Type:** Python Script 🐍\n\n',
+          '.sh': '**Type:** Shell Script 💻\n\n'
+        };
+        content += fileTypeMap[ext] || '**Type:** Source File 📄\n\n';
 
         // Add file comment if exists
         if (comments && comments[file]) {
           content += `**💭 Review Comment:**\n${comments[file]}\n\n`;
         }
 
-        // Add diff
-        const diff = executeGitCommand(`git diff --cached "${file}"`);
-        content += `\`\`\`diff\n${diff}\`\`\`\n\n`;
+        // Add diff with enhanced line numbers using DiffService
+        const diff = await executeGitCommand('diff-cached', ['--', file]);
+        content += DiffService.generateEnhancedDiffMarkdown(diff);
 
         processedCount++;
       } catch (error) {
         console.error(`Error processing ${file}:`, error);
-        content += `**Error:** Could not load diff for ${file}\n\n`;
+        errors.push(file);
+        content += `**❌ Error:** Could not load diff for \`${file}\` - ${error.message}\n\n`;
       }
     }
 
@@ -273,53 +607,58 @@ ${excludedFiles.map(f => `- \`${f}\``).join('\n')}
       content += '\n';
     }
 
-    // Add review checklist
+    // Enhanced review checklist
     content += `---
 
-## 🤖 Review Checklist
+## 🤖 AI Review Checklist
 
 Please review these changes for:
 
 ### 🔍 Code Quality
-- [ ] **ESLint Compliance**: No \`any\` types, no unused imports/variables
-- [ ] **TypeScript Strict Mode**: Proper typing throughout
-- [ ] **React Best Practices**: Hooks order, component structure
-- [ ] **Performance**: Efficient rendering, proper memoization
+- [ ] **Linting Compliance**: No unused imports/variables, proper formatting
+- [ ] **Type Safety**: Proper typing throughout (TypeScript/JSDoc)
+- [ ] **Best Practices**: Framework-specific conventions and patterns
+- [ ] **Performance**: Efficient algorithms, proper memoization
+- [ ] **Documentation**: Clear comments and function descriptions
 
 ### 🐛 Potential Issues
 - [ ] **Runtime Errors**: Type mismatches, null/undefined handling
 - [ ] **Logic Bugs**: Incorrect calculations, edge cases
-- [ ] **Memory Leaks**: Cleanup in useEffect, event listeners
-- [ ] **Accessibility**: ARIA labels, keyboard navigation
+- [ ] **Memory Leaks**: Cleanup in lifecycle methods, event listeners
+- [ ] **Error Handling**: Proper try-catch blocks, user feedback
+- [ ] **Accessibility**: ARIA labels, keyboard navigation, screen readers
 
 ### 🔒 Security & Data
-- [ ] **Input Sanitization**: XSS prevention, data validation
-- [ ] **Privacy**: No sensitive data exposure
-- [ ] **Dependencies**: Updated packages, security vulnerabilities
+- [ ] **Input Validation**: Sanitization, XSS prevention, SQL injection
+- [ ] **Authentication**: Proper access controls and permissions
+- [ ] **Privacy**: No sensitive data exposure in logs/client
+- [ ] **Dependencies**: Updated packages, vulnerability checks
 
 ### 📱 UX/UI
-- [ ] **Responsive Design**: Mobile/desktop compatibility
+- [ ] **Responsive Design**: Mobile/desktop/tablet compatibility
 - [ ] **Loading States**: Proper feedback during async operations
-- [ ] **Error Handling**: User-friendly error messages
-- [ ] **Animations**: Smooth, purposeful transitions
+- [ ] **Error Messages**: User-friendly error handling and recovery
+- [ ] **Performance**: Fast loading, smooth animations
 
-### 💡 Suggestions
+### 💡 Suggestions & Improvements
 Please provide specific feedback on:
-1. Any potential improvements
-2. Missing error handling
-3. Performance optimizations
-4. Code organization suggestions
+1. Code organization and structure improvements
+2. Performance optimization opportunities
+3. Security considerations and hardening
+4. Testing coverage and strategies
+5. Documentation and maintainability
 
 ---
-*Generated by AI Visual Code Review (${processedCount} files processed)*
+*Generated by AI Visual Code Review v1.0.0*
+*Files processed: ${processedCount}/${includedFiles.length} | Errors: ${errors.length} | Generated: ${new Date().toISOString()}*
 `;
 
-    // Write to AI_REVIEW.md in current working directory
+    // Ensure directory exists and write file
     const filePath = path.join(process.cwd(), 'AI_REVIEW.md');
-    writeFileSync(filePath, content);
+    writeFileSync(filePath, content, 'utf8');
 
     console.log('✅ AI_REVIEW.md generated successfully');
-    console.log(`📊 Final stats: ${processedCount} files processed, ${excludedFiles?.length || 0} excluded`);
+    console.log(`📊 Final stats: ${processedCount} files processed, ${excludedFiles?.length || 0} excluded, ${errors.length} errors`);
 
     res.json({
       success: true,
@@ -327,67 +666,114 @@ Please provide specific feedback on:
       filesProcessed: processedCount,
       totalFiles: stagedFiles.length,
       excludedCount: excludedFiles?.length || 0,
-      excludedFiles: excludedFiles || []
+      excludedFiles: excludedFiles || [],
+      errors: errors,
+      timestamp: new Date().toISOString(),
+      contentLength: content.length
     });
 
   } catch (error) {
     console.error('❌ Export for AI failed:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: 'Failed to generate AI review',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      timestamp: new Date().toISOString()
     });
   }
-});
+}));
 
-// Individual file export endpoint
-app.post('/api/export-individual-reviews', (req, res) => {
+// Individual file export endpoint with async operations
+app.post('/api/export-individual-reviews', exportRateLimit, handleAsyncRoute(async (req, res) => {
+  // Validate request body
+  const validation = validateExportRequest(req.body);
+  if (!validation.valid) {
+    return res.status(400).json({
+      success: false,
+      error: validation.error,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  const { comments = {}, lineComments = {}, excludedFiles = [] } = req.body;
+
+  console.log('📁 Individual Export request received');
+  console.log('📋 Excluded files:', excludedFiles.length);
+  console.log('💬 File comments:', Object.keys(comments).length);
+
   try {
-    const { comments, lineComments, excludedFiles } = req.body;
+    // Get all staged files with async operation
+    const stagedOutput = await executeGitCommand('diff-cached-names');
+    const stagedFiles = stagedOutput.trim() ?
+      stagedOutput.trim().split('\n').filter(f => f.length > 0) : [];
 
-    console.log('📁 Individual Export request received');
-
-    // Get all staged files
-    const stagedFiles = executeGitCommand('git diff --cached --name-only')
-      .trim()
-      .split('\n')
-      .filter(f => f.length > 0);
+    if (stagedFiles.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No staged files found. Please run "git add ." first.',
+        timestamp: new Date().toISOString()
+      });
+    }
 
     // Filter out excluded files
     const includedFiles = stagedFiles.filter(file => {
-      return !excludedFiles || !excludedFiles.includes(file);
+      const isExcluded = excludedFiles && excludedFiles.includes(file);
+      if (isExcluded) {
+        console.log(`⏭️  Excluding: ${file}`);
+      }
+      return !isExcluded;
     });
 
     const timestamp = new Date().toISOString().slice(0, 19).replace(/[:]/g, '-');
     const reviewDir = `code-reviews-${timestamp}`;
 
-    // Create directory if it doesn't exist
-    const { mkdirSync } = require('fs');
+    // Create directory
     const reviewPath = path.join(process.cwd(), reviewDir);
-
     try {
       mkdirSync(reviewPath, { recursive: true });
     } catch (error) {
-      // Directory might already exist
+      if (error.code !== 'EEXIST') {
+        throw new Error(`Failed to create review directory: ${error.message}`);
+      }
     }
 
     let filesCreated = 0;
+    const errors = [];
 
     // Create individual review file for each included file
     for (const file of includedFiles) {
       try {
-        const safeName = file.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const safeName = file.replace(/[^a-zA-Z0-9.\-_]/g, '_');
         const reviewFileName = `review-${safeName}.md`;
         const reviewFilePath = path.join(reviewPath, reviewFileName);
+
+        // Enhanced file type detection
+        const ext = path.extname(file).toLowerCase();
+        const fileTypeMap = {
+          '.tsx': 'TypeScript React Component ⚛️',
+          '.ts': 'TypeScript Source File 📘',
+          '.js': 'JavaScript Source File 🟨',
+          '.jsx': 'React Component (JavaScript) ⚛️',
+          '.json': 'Configuration/Data File 📋',
+          '.md': 'Documentation 📖',
+          '.css': 'Stylesheet 🎨',
+          '.scss': 'Sass Stylesheet 🎨',
+          '.html': 'HTML Template 🌐',
+          '.py': 'Python Script 🐍',
+          '.sh': 'Shell Script 💻'
+        };
 
         let content = `# 📄 Code Review: \`${file}\`
 
 **Generated:** ${new Date().toLocaleString()}
 **Project:** AI Visual Code Review
+**Review Type:** Individual File Analysis
 
 ## 📊 File Information
 
-**Type:** ${path.extname(file) || 'No extension'}
+**Type:** ${fileTypeMap[ext] || 'Source File 📄'}
 **Path:** \`${file}\`
+**Extension:** ${ext || 'None'}
 
 `;
 
@@ -400,78 +786,140 @@ ${comments[file]}
 `;
         }
 
-        // Add diff
-        try {
-          const diff = executeGitCommand(`git diff --cached "${file}"`);
-          content += `## 🔍 Changes
+        // Add line comments if exist for this file
+        const fileLineComments = Object.entries(lineComments || {})
+          .filter(([lineId]) => lineId.includes(file.replace(/[^a-zA-Z0-9]/g, '_')));
 
-\`\`\`diff
-${diff}
-\`\`\`
+        if (fileLineComments.length > 0) {
+          content += `## 🔍 Line Comments
 
 `;
+          fileLineComments.forEach(([lineId, comment]) => {
+            content += `- **${lineId}:** ${comment}\n`;
+          });
+          content += '\n';
+        }
+
+        // Add diff with enhanced line numbers using DiffService
+        try {
+          const diff = await executeGitCommand('diff-cached', ['--', file]);
+          content += `## 📝 Changes
+
+`;
+          content += DiffService.generateEnhancedDiffMarkdown(diff);
         } catch (error) {
+          console.error(`Error loading diff for ${file}:`, error);
+          errors.push(file);
           content += `## ❌ Error
 
-Could not load diff for ${file}: ${error.message}
+Could not load diff for \`${file}\`: ${error.message}
 
 `;
         }
 
-        // Add review template
-        content += `## 🤖 Review Checklist
+        // Enhanced review template
+        content += `## 🤖 Comprehensive Review Checklist
 
-### ✅ Code Quality
-- [ ] Syntax and formatting
-- [ ] Variable naming and clarity
-- [ ] Function/method structure
-- [ ] Documentation and comments
+### ✅ Code Quality & Standards
+- [ ] **Syntax & Formatting**: Consistent indentation, proper spacing
+- [ ] **Naming Conventions**: Clear, descriptive variable/function names
+- [ ] **Code Structure**: Logical organization, appropriate function size
+- [ ] **Documentation**: Clear comments explaining complex logic
+- [ ] **Type Safety**: Proper typing (if applicable)
 
-### 🔍 Logic Review
-- [ ] Algorithm correctness
-- [ ] Edge case handling
-- [ ] Error handling
-- [ ] Performance considerations
+### 🔍 Logic & Functionality
+- [ ] **Algorithm Correctness**: Logic implements requirements correctly
+- [ ] **Edge Case Handling**: Boundary conditions properly addressed
+- [ ] **Error Handling**: Appropriate try-catch blocks and error messages
+- [ ] **Performance**: Efficient algorithms, no unnecessary loops
+- [ ] **Memory Management**: Proper cleanup, no memory leaks
 
-### 🐛 Potential Issues
-- [ ] Memory leaks
-- [ ] Security vulnerabilities
-- [ ] Race conditions
-- [ ] Null/undefined handling
+### 🐛 Potential Issues & Bugs
+- [ ] **Runtime Errors**: No null/undefined dereferencing
+- [ ] **Type Mismatches**: Consistent data types throughout
+- [ ] **Race Conditions**: Proper async/await handling
+- [ ] **Resource Leaks**: Event listeners, timers properly cleaned up
+- [ ] **Off-by-one Errors**: Array/loop bounds correctly handled
 
-### 💡 Suggestions
-Add your feedback here:
+### 🔒 Security Considerations
+- [ ] **Input Validation**: User inputs properly sanitized
+- [ ] **XSS Prevention**: No unsafe HTML injection
+- [ ] **Authentication**: Proper access controls if applicable
+- [ ] **Data Exposure**: No sensitive information in logs/client
+- [ ] **Dependency Security**: No known vulnerable packages
+
+### 📱 User Experience & Accessibility
+- [ ] **Responsive Design**: Works on different screen sizes
+- [ ] **Loading States**: Proper feedback during operations
+- [ ] **Error Messages**: User-friendly error communication
+- [ ] **Accessibility**: ARIA labels, keyboard navigation
+- [ ] **Performance**: Fast loading, smooth interactions
+
+### 💡 Improvement Suggestions
+
+#### Code Organization
+- [ ] Consider extracting complex logic into separate functions
+- [ ] Evaluate if constants should be moved to configuration
+- [ ] Check for code duplication opportunities
+
+#### Performance Optimizations
+- [ ] Identify opportunities for memoization
+- [ ] Consider lazy loading for heavy operations
+- [ ] Evaluate database query efficiency (if applicable)
+
+#### Testing Recommendations
+- [ ] Unit tests for core functionality
+- [ ] Integration tests for API endpoints
+- [ ] Edge case testing scenarios
+
+#### Documentation Needs
+- [ ] API documentation updates
+- [ ] Code comments for complex algorithms
+- [ ] README updates if public interfaces changed
+
+### 📝 Review Notes
+*Add your specific feedback, suggestions, and observations here:*
 
 ---
-*Individual file review generated by AI Visual Code Review*
+*Individual file review generated by AI Visual Code Review v1.0.0*
+*Generated: ${new Date().toISOString()}*
 `;
 
-        writeFileSync(reviewFilePath, content);
+        writeFileSync(reviewFilePath, content, 'utf8');
         filesCreated++;
         console.log(`✅ Created: ${reviewFileName}`);
 
       } catch (error) {
         console.error(`❌ Error creating review for ${file}:`, error);
+        errors.push(file);
       }
     }
+
+    console.log(`📊 Individual review stats: ${filesCreated} files created, ${errors.length} errors`);
 
     res.json({
       success: true,
       directory: reviewDir,
       filesCreated,
       totalFiles: stagedFiles.length,
+      includedFiles: includedFiles.length,
       excludedCount: excludedFiles?.length || 0,
-      commentsIncluded: Object.keys(comments || {}).length
+      commentsIncluded: Object.keys(comments || {}).length,
+      lineCommentsIncluded: Object.keys(lineComments || {}).length,
+      errors: errors,
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {
     console.error('❌ Individual export failed:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: 'Failed to create individual reviews',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      timestamp: new Date().toISOString()
     });
   }
-});
+}));
 
 // Serve the main review interface
 app.get('/', (req, res) => {

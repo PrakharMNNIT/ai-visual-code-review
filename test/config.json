@@ -1,0 +1,38 @@
+{
+  "project": {
+    "name": "AI Visual Code Review Test",
+    "version": "1.0.0",
+    "description": "Test configuration for demonstrating code review functionality"
+  },
+  "review_settings": {
+    "max_file_size": 10000,
+    "exclude_patterns": [
+      "node_modules/*",
+      "*.log",
+      "dist/*",
+      ".env*"
+    ],
+    "include_file_types": [
+      ".js", ".ts", ".tsx", ".py", ".json", ".md"
+    ],
+    "auto_open_browser": true,
+    "default_port": 3002
+  },
+  "ai_export": {
+    "format": "markdown",
+    "include_line_numbers": true,
+    "add_file_context": true,
+    "checklist_items": [
+      "Code Quality",
+      "Security Issues",
+      "Performance Optimizations",
+      "Accessibility Compliance",
+      "Error Handling"
+    ]
+  },
+  "security": {
+    "enable_cors": true,
+    "request_size_limit": "10mb",
+    "disable_in_production": true
+  }
+}

@@ -12,7 +12,12 @@
     "review": "node server.js",
     "quick": "./scripts/quick-ai-review.sh",
     "install-global": "npm install -g .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:security": "npm audit --audit-level high",
+    "dev": "nodemon server.js",
+    "lint": "eslint . --ext .js --ignore-path .gitignore"
   },
   "keywords": [
     "code-review",
@@ -29,6 +34,23 @@
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "nodemon": "^3.0.1",
+    "eslint": "^8.50.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!node_modules/**",
+      "!coverage/**",
+      "!test/**"
+    ],
+    "coverageReporters": ["text", "lcov", "html"],
+    "testMatch": ["**/test/**/*.test.js"]
   },
   "engines": {
     "node": ">=14.0.0"
