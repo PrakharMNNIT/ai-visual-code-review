@@ -1,0 +1,178 @@
+{
+  "name": "ai-visual-code-review",
+  "displayName": "AI Visual Code Review",
+  "description": "Comprehensive visual code review system with AI integration for Git repositories",
+  "version": "1.0.0",
+  "publisher": "ai-code-review",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "SCM Providers"
+  ],
+  "keywords": [
+    "code-review",
+    "git",
+    "ai",
+    "visual",
+    "diff",
+    "github",
+    "development",
+    "quality"
+  ],
+  "activationEvents": [
+    "onCommand:aiCodeReview.openReview",
+    "onCommand:aiCodeReview.exportForAI",
+    "onCommand:aiCodeReview.quickReview"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "aiCodeReview.openReview",
+        "title": "Open AI Code Review",
+        "category": "AI Code Review",
+        "icon": "$(search-view-icon)"
+      },
+      {
+        "command": "aiCodeReview.exportForAI",
+        "title": "Export for AI Review",
+        "category": "AI Code Review",
+        "icon": "$(export)"
+      },
+      {
+        "command": "aiCodeReview.quickReview",
+        "title": "Quick AI Review",
+        "category": "AI Code Review",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "aiCodeReview.refreshFiles",
+        "title": "Refresh Staged Files",
+        "category": "AI Code Review",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "aiCodeReview.openReview",
+          "when": "gitOpenRepositoryCount != 0"
+        },
+        {
+          "command": "aiCodeReview.exportForAI",
+          "when": "gitOpenRepositoryCount != 0"
+        },
+        {
+          "command": "aiCodeReview.quickReview",
+          "when": "gitOpenRepositoryCount != 0"
+        }
+      ],
+      "scm/title": [
+        {
+          "command": "aiCodeReview.openReview",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        },
+        {
+          "command": "aiCodeReview.exportForAI",
+          "group": "1_modification",
+          "when": "scmProvider == git"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "aiCodeReview.refreshFiles",
+          "when": "view == aiCodeReviewView",
+          "group": "navigation"
+        }
+      ]
+    },
+    "views": {
+      "scm": [
+        {
+          "id": "aiCodeReviewView",
+          "name": "AI Code Review",
+          "when": "gitOpenRepositoryCount != 0"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "aiCodeReview",
+          "title": "AI Code Review",
+          "icon": "$(search-view-icon)"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "AI Code Review",
+      "properties": {
+        "aiCodeReview.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically refresh staged files when git status changes"
+        },
+        "aiCodeReview.showLineNumbers": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show line numbers in diff view"
+        },
+        "aiCodeReview.maxFileSize": {
+          "type": "number",
+          "default": 10000,
+          "description": "Maximum file size to process (in KB)"
+        },
+        "aiCodeReview.excludePatterns": {
+          "type": "array",
+          "default": [
+            "node_modules/**",
+            "dist/**",
+            "build/**",
+            "*.log",
+            "package-lock.json"
+          ],
+          "description": "File patterns to exclude from review"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "simple-git": "^3.19.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PrakharMNNIT/ai-visual-code-review.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PrakharMNNIT/ai-visual-code-review/issues"
+  },
+  "homepage": "https://github.com/PrakharMNNIT/ai-visual-code-review#readme",
+  "license": "MIT",
+  "icon": "resources/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  }
+}

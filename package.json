@@ -1,6 +1,6 @@
 {
   "name": "ai-visual-code-review",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A comprehensive visual code review system with AI integration for any Git repository",
   "main": "server.js",
   "bin": {
@@ -58,6 +58,15 @@
       "**/test/**/*.test.js"
     ]
   },
+  "files": [
+    "bin/**",
+    "scripts/**",
+    "services/**",
+    "public/**",
+    "server.js",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=14.0.0"
   },

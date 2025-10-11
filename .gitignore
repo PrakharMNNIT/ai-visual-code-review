@@ -74,7 +74,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public - Removed: needed for web interface
 
 # Vuepress build output
 .vuepress/dist
