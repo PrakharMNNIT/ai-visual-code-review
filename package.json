@@ -4,8 +4,8 @@
   "description": "A comprehensive visual code review system with AI integration for any Git repository",
   "main": "server.js",
   "bin": {
-    "ai-review": "./bin/ai-review.js",
-    "quick-ai-review": "./scripts/quick-ai-review.sh"
+    "ai-review": "bin/ai-review.js",
+    "quick-ai-review": "scripts/quick-ai-review.sh"
   },
   "scripts": {
     "start": "node server.js",

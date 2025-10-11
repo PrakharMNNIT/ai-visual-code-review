@@ -41,7 +41,6 @@ const createRateLimit = (maxRequests, windowMs) => {
     const isTesting = process.env.NODE_ENV === 'test';
 
     if (isLocalhost && isDevelopment && !isTesting) {
-      console.log(`💨 Rate limiting bypassed for localhost: ${req.method} ${req.path}`);
       return next();
     }
 

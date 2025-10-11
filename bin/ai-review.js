@@ -110,9 +110,14 @@ function quickReview() {
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-let command = 'start';
+let command = args.length === 0 ? 'start' : args[0]; // Default to 'start' if no args
 let port = PORT;
 let openBrowser = false;
+
+// If first arg is not a known command, treat as 'start'
+if (args.length > 0 && !['start', 'serve', 's', 'quick', 'q', 'help', 'h', '--help', '-h'].includes(args[0])) {
+  command = 'start';
+}
 
 // Parse arguments
 for (let i = 0; i < args.length; i++) {
@@ -160,10 +165,6 @@ for (let i = 0; i < args.length; i++) {
         console.error(`❌ Unknown option: ${arg}`);
         console.log('💡 Use --help for usage information');
         process.exit(1);
-      }
-      // If no command specified yet, treat as command
-      if (command === 'start' && i === 0) {
-        command = arg;
       }
       break;
   }

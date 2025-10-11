@@ -1,0 +1,331 @@
+# AI Visual Code Review Project - Cline Instructions
+
+I am Cline, an expert software engineer working on **AI Visual Code Review** - a comprehensive visual code review system with AI integration for any Git repository.
+
+## 🚨 MANDATORY COMMIT WORKFLOW
+
+**NEVER commit directly with `git commit -m`. ALWAYS follow this process:**
+
+1. **Create COMMIT_MESSAGE.md** with structured format (see guide below)
+2. **Stage changes:** `git add -A`
+3. **Commit using file:** `git commit -F COMMIT_MESSAGE.md`
+4. **Clean up:** Remove COMMIT_MESSAGE.md after successful commit
+
+This ensures consistent, detailed commit messages with proper formatting every time.
+
+## 🔍 **AI Visual Code Review Project Overview**
+
+### **Project Purpose**
+
+- **Visual Code Review System** with GitHub-like interface
+- **AI Integration** for structured code review exports
+- **Multi-Platform Support**: CLI, Web interface, VSCode extension
+- **Enterprise Security** with comprehensive protection layers
+- **Production Ready** with extensive testing and documentation
+
+### **Technology Stack**
+
+- **Runtime:** Node.js 14+ with Express.js
+- **Language:** JavaScript (server), TypeScript (VSCode extension)
+- **Frontend:** Vanilla JavaScript with advanced DOM manipulation
+- **Testing:** Jest + SuperTest for comprehensive coverage
+- **Security:** Multiple protection layers, rate limiting, input validation
+
+### **Project Structure**
+
+- `server.js` - Main Express server with security hardening
+- `bin/ai-review.js` - CLI interface and command processing
+- `services/diffService.js` - Git diff parsing and security validation
+- `public/index.html` - Interactive web interface with GitHub-like styling
+- `vscode-extension/` - Native VSCode integration
+- `test/` - Comprehensive security and functionality tests
+
+## 🎯 **Development Guidelines**
+
+### **Security First Approach**
+
+- **Always validate inputs** - No user input should be trusted
+- **Prevent command injection** - Use allowlisted Git commands only
+- **Path traversal protection** - Validate all file paths
+- **Rate limiting** - Implement on all public endpoints
+- **Security headers** - Set comprehensive headers on all responses
+
+### **Code Quality Standards**
+
+- **Error handling** - Wrap async operations with proper error handling
+- **Memory management** - Implement cleanup for long-running processes
+- **Input sanitization** - Validate and sanitize all user inputs
+- **Performance** - Use caching and async operations appropriately
+- **Documentation** - Comment complex logic and security measures
+
+### **Testing Requirements**
+
+- **Security testing** - Test for injection attacks, XSS, path traversal
+- **API testing** - Cover all endpoints including error scenarios
+- **Rate limiting** - Verify limits are enforced correctly
+- **Cross-platform** - Ensure compatibility across operating systems
+
+## 🚀 **Key Features to Maintain**
+
+### **Visual Interface**
+
+- GitHub-like dark theme with professional styling
+- Interactive diff viewer with syntax highlighting
+- Line-by-line commenting with templates
+- File selection for AI export control
+- Real-time notifications and loading states
+
+### **AI Integration**
+
+- Structured exports optimized for ChatGPT/Claude
+- Comprehensive review checklists (security, performance, accessibility)
+- Multiple export formats (unified and individual file reviews)
+- Context-aware analysis for different file types
+
+### **Security Features**
+
+- Multi-layer protection against common attacks
+- Rate limiting with configurable windows
+- Input validation and sanitization
+- Security headers and CORS configuration
+- Production-safe error handling
+
+## ⚠️ **Common Pitfalls to Avoid**
+
+### **Security Mistakes**
+
+- ❌ Don't trust user input without validation
+- ❌ Don't execute arbitrary commands
+- ❌ Don't expose internal errors in production
+- ❌ Don't skip rate limiting on new endpoints
+- ❌ Don't allow path traversal in file operations
+
+### **Development Mistakes**
+
+- ❌ Don't skip error handling for async operations
+- ❌ Don't ignore memory leaks in long-running processes
+- ❌ Don't hardcode file paths or configuration
+- ❌ Don't skip input sanitization
+- ❌ Don't forget to update tests for new features
+
+### **Architecture Mistakes**
+
+- ❌ Don't tightly couple components
+- ❌ Don't bypass the security validation layers
+- ❌ Don't ignore performance implications
+- ❌ Don't skip documentation for complex logic
+
+## 🔄 **Development Workflow**
+
+### **Before Making Changes**
+
+1. **Understand the security implications** - Consider how changes affect security
+2. **Review existing patterns** - Follow established patterns in the codebase
+3. **Plan error handling** - Consider failure scenarios and recovery
+4. **Update tests** - Ensure comprehensive test coverage
+
+### **Code Review Checklist**
+
+- [ ] Security validation for all inputs
+- [ ] Proper error handling and recovery
+- [ ] Memory leak prevention
+- [ ] Cross-platform compatibility
+- [ ] Documentation for complex logic
+- [ ] Test coverage for new functionality
+
+---
+
+## **Emoji Guide for Enhanced Commit Messages**
+
+### **Standard Type Emojis**
+
+1. **feat:** (Feature)
+
+```
+✨ feat: add user authentication
+🎯 feat: implement search functionality
+🌟 feat: add new dashboard
+```
+
+2. **fix:** (Bug Fix)
+
+```
+🐛 fix: resolve login page crash
+🚑 fix: patch critical bug
+🩹 fix: minor bug fixes
+```
+
+3. **docs:** (Documentation)
+
+```
+📚 docs: update README
+📝 docs: add API documentation
+📖 docs: improve code comments
+```
+
+4. **style:** (Formatting)
+
+```
+💄 style: format code
+🎨 style: improve structure
+🔍 style: lint fixes
+```
+
+5. **refactor:** (Code Refactoring)
+
+```
+♻️ refactor: restructure authentication
+🔨 refactor: improve code organization
+🛠️ refactor: optimize logic
+```
+
+6. **test:** (Testing)
+
+```
+✅ test: add unit tests
+🧪 test: update test cases
+🔬 test: add integration tests
+```
+
+7. **chore:** (Maintenance)
+
+```
+🔧 chore: update dependencies
+🚧 chore: work in progress
+⚙️ chore: configure settings
+```
+
+8. **perf:** (Performance)
+
+```
+⚡ perf: improve loading speed
+🚀 perf: optimize performance
+⏱️ perf: reduce runtime
+```
+
+9. **ci:** (Continuous Integration)
+
+```
+👷 ci: add CI pipeline
+🔄 ci: update workflow
+⚗️ ci: modify build process
+```
+
+10. **build:** (Build System)
+
+```
+📦 build: update dependencies
+🏗️ build: modify webpack config
+🔨 build: change build tools
+```
+
+### **Security-Specific Emojis**
+
+```
+🔒 security: add authentication
+🛡️ security: enhance protection
+🚨 security: fix vulnerability
+⚠️ security: add validation
+```
+
+### **AI Code Review Specific Emojis**
+
+```
+🔍 review: improve code analysis
+🤖 ai: enhance AI integration
+📊 export: improve review export
+💬 comment: update commenting system
+```
+
+## **Commit Message Creation Guide**
+
+### **Step-by-Step Process**
+
+#### **1. Analyze Your Changes**
+
+- What files were modified?
+- What functionality was added, removed, or fixed?
+- Are there any security implications?
+- Does this affect the AI integration?
+
+#### **2. Choose the Right Type**
+
+```
+Is it a bug fix? → fix
+Is it a new feature? → feat
+Is it documentation? → docs
+Is it security-related? → security
+Is it refactoring? → refactor
+Is it performance improvement? → perf
+Is it testing related? → test
+Is it build/dependency related? → build
+Is it CI/CD related? → ci
+Is it maintenance/cleanup? → chore
+```
+
+#### **3. Add Appropriate Scope**
+
+```
+feat(auth): add OAuth2 support
+fix(api): resolve timeout issue
+security(validation): add input sanitization
+docs(readme): update installation steps
+```
+
+### **Templates for AI Code Review Project**
+
+#### **Security Fix Template**
+
+```
+🔒 security(component): brief description of security fix
+
+Explain what vulnerability was fixed and how.
+Include impact assessment and prevention measures.
+
+- Security improvement 1
+- Security improvement 2
+
+Fixes #issue-number
+```
+
+#### **Feature Template**
+
+```
+✨ feat(area): brief description of feature
+
+Explain what this feature does and why it's needed.
+Include any AI integration or review improvements.
+
+- Key feature point 1
+- Key feature point 2
+
+Closes #issue-number
+```
+
+### **Commit Process Using COMMIT_MESSAGE.md**
+
+1. **Create COMMIT_MESSAGE.md** with full commit details:
+
+   ```markdown
+   🔒 security(validation): add input sanitization
+
+   ## Problem
+   User inputs were not properly sanitized, allowing potential XSS attacks
+
+   ## Solution
+   - Added comprehensive input validation
+   - Implemented HTML escaping
+   - Added security tests
+
+   ## Impact
+   - Prevents XSS vulnerabilities
+   - Improves overall security posture
+   ```
+
+2. **Stage changes:** `git add -A`
+3. **Commit using file:** `git commit -F COMMIT_MESSAGE.md`
+4. **Clean up:** Remove COMMIT_MESSAGE.md after successful commit
+
+---
+
+This guide ensures consistent, secure, and well-documented development practices for the AI Visual Code Review project.
