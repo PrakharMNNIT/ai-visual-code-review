@@ -11,6 +11,7 @@ A **production-ready**, comprehensive visual code review system with AI integrat
 ## 🚀 **What's New in v2.0**
 
 ### 🔒 **Security Hardened**
+
 - **Command Injection Protection** - Secure Git command execution with allowlists
 - **Rate Limiting** - DoS protection with configurable limits
 - **Input Validation** - Comprehensive sanitization of all user inputs
@@ -18,12 +19,14 @@ A **production-ready**, comprehensive visual code review system with AI integrat
 - **Path Traversal Prevention** - Multiple layers of file path validation
 
 ### ⚡ **Performance Enhanced**
+
 - **Async Operations** - Non-blocking Git operations with timeouts
 - **Memory Management** - Automatic cleanup prevents memory leaks
 - **Request Caching** - Smart caching for repeated requests
 - **Progressive Loading** - Better UX with lazy loading
 
 ### 🎨 **UX Improvements**
+
 - **Smart Notifications** - Real-time feedback system
 - **Enhanced File Icons** - Better file type recognition
 - **Accessibility** - ARIA labels, keyboard navigation
@@ -33,6 +36,7 @@ A **production-ready**, comprehensive visual code review system with AI integrat
 ## ✨ Core Features
 
 ### Visual Review Interface
+
 - **GitHub-like Dark Theme** with professional styling
 - **Interactive Diff Viewer** with syntax highlighting and line numbers
 - **Line-by-line Commenting** with templates and persistence
@@ -42,6 +46,7 @@ A **production-ready**, comprehensive visual code review system with AI integrat
 - **Keyboard Navigation** full accessibility support
 
 ### AI Integration
+
 - **Structured Export** generates comprehensive review documents
 - **Multiple Export Formats** (unified or individual file reviews)
 - **Enhanced Checklists** covering security, performance, accessibility
@@ -50,6 +55,7 @@ A **production-ready**, comprehensive visual code review system with AI integrat
 - **Error Tracking** detailed reporting of processing issues
 
 ### Developer Experience
+
 - **Zero Configuration** works with any Git repository out of the box
 - **Multiple Access Methods** (CLI, web interface, quick scripts)
 - **Flexible File Filtering** advanced include/exclude patterns
@@ -95,12 +101,14 @@ chmod +x scripts/quick-ai-review.sh
 ### Basic Workflow
 
 1. **Navigate to your project**
+
    ```bash
    cd your-project
    git add .  # Stage changes
    ```
 
 2. **Start visual review**
+
    ```bash
    ai-review  # Opens http://localhost:3002
    ```
@@ -115,6 +123,7 @@ chmod +x scripts/quick-ai-review.sh
    - Gets `AI_REVIEW.md` with structured format
 
 5. **Get AI feedback**
+
    ```
    Ask ChatGPT/Claude: "Please review the AI_REVIEW.md file and provide detailed feedback on code quality, potential issues, and improvements."
    ```
@@ -138,19 +147,27 @@ ai-review --help
 
 ### Quick Script Usage
 
+**Recommended: Use CLI command** (cross-platform Node.js)
+
 ```bash
 # Basic export
-./scripts/quick-ai-review.sh
+ai-review quick
 
 # Exclude specific files
-./scripts/quick-ai-review.sh --exclude package-lock.json dist/
+ai-review quick --exclude package-lock.json dist/
 
 # Include only specific files
-./scripts/quick-ai-review.sh --include src/main.ts src/components/
+ai-review quick --include src/main.ts src/components/
 
 # Custom size limits
-./scripts/quick-ai-review.sh --max-size 5000
-./scripts/quick-ai-review.sh --no-size-limit
+ai-review quick --max-size 5000
+ai-review quick --no-size-limit
+```
+
+**Alternative: Direct script** (legacy bash script)
+
+```bash
+./scripts/quick-ai-review.sh
 ```
 
 ## 🎯 Advanced Usage
@@ -158,18 +175,29 @@ ai-review --help
 ### File Filtering
 
 #### Include/Exclude Patterns
+
+**Enhanced glob pattern support:**
+
+- `**` matches zero or more directories
+- `*` matches any characters in filename
+- Patterns are matched against full file paths
+
 ```bash
 # Exclude large config files
 ai-review quick --exclude package-lock.json webpack.config.js
 
-# Focus on source code only
+# Focus on source code only (** matches nested directories)
 ai-review quick --include "src/**/*.ts" "src/**/*.tsx"
+
+# Match files in scripts/ including root level
+ai-review quick --include "scripts/**/*.js"
 
 # Exclude entire directories
 ai-review quick --exclude "dist/*" "node_modules/*" "*.log"
 ```
 
 #### Size Management
+
 ```bash
 # Skip files over 1000 lines
 ai-review quick --max-size 1000
@@ -194,7 +222,9 @@ PORT=3003 ai-review start
 ### Integration with Editors
 
 #### VS Code Tasks
+
 Add to `.vscode/tasks.json`:
+
 ```json
 {
   "version": "2.0.0",
@@ -217,7 +247,9 @@ Add to `.vscode/tasks.json`:
 ```
 
 #### Git Hooks
+
 Pre-commit hook example:
+
 ```bash
 #!/bin/bash
 # .git/hooks/pre-commit
@@ -237,7 +269,7 @@ fi
 export PORT=3002                    # Server port
 export NODE_ENV=development         # Environment mode
 
-# Git configuration  
+# Git configuration
 export GIT_DIFF_CONTEXT=3          # Diff context lines
 export GIT_DIFF_ALGORITHM=patience  # Diff algorithm
 ```
@@ -245,6 +277,7 @@ export GIT_DIFF_ALGORITHM=patience  # Diff algorithm
 ### Project Configuration
 
 Create `.ai-review.json` in your project root:
+
 ```json
 {
   "excludePatterns": [
@@ -263,6 +296,7 @@ Create `.ai-review.json` in your project root:
 ## 📊 Export Formats
 
 ### Unified Review (`AI_REVIEW.md`)
+
 ```markdown
 # 🔍 Code Review - [timestamp]
 
@@ -277,10 +311,12 @@ Create `.ai-review.json` in your project root:
 ```
 
 ## 🤖 Review Checklist
+
 - [ ] Code Quality
-- [ ] Security & Data  
+- [ ] Security & Data
 - [ ] Performance
 - [ ] Accessibility
+
 ```
 
 ### Individual File Reviews
@@ -292,26 +328,31 @@ Creates `code-reviews-[timestamp]/` directory with separate markdown file for ea
 
 **For ChatGPT/Claude:**
 ```
+
 Please review the AI_REVIEW.md file and provide detailed feedback on:
 
 1. Code Quality & Best Practices
-2. Potential Bugs & Edge Cases  
+2. Potential Bugs & Edge Cases
 3. Security Vulnerabilities
 4. Performance Optimizations
 5. Accessibility Improvements
 6. Testing Recommendations
 
 Focus on actionable suggestions with examples.
+
 ```
 
 **For Code-specific Analysis:**
 ```
+
 Analyze this [TypeScript/Python/etc] code for:
+
 - Type safety issues
-- Framework-specific anti-patterns  
+- Framework-specific anti-patterns
 - Memory leaks or performance issues
 - Missing error handling
 - Opportunities for refactoring
+
 ```
 
 ### Supported Frameworks
@@ -349,6 +390,7 @@ npm start
 ### Testing Suite
 
 **Comprehensive test coverage includes:**
+
 - ✅ API endpoint testing with security validation
 - ✅ Git command injection prevention
 - ✅ Rate limiting functionality
@@ -393,6 +435,7 @@ ai-visual-code-review/
 ### Enhanced API Endpoints
 
 **Core Endpoints:**
+
 - `GET /` - Enhanced web interface with memory management
 - `GET /api/health` - Repository status with version info
 - `GET /api/summary` - Change statistics with caching
@@ -403,6 +446,7 @@ ai-visual-code-review/
 - `POST /api/export-individual-reviews` - Individual file reviews
 
 **Security Features:**
+
 - 🔒 Rate limiting on all endpoints
 - 🛡️ Input sanitization and validation
 - 🔐 Command injection prevention
@@ -414,24 +458,28 @@ ai-visual-code-review/
 ### Multi-Layer Security Protection
 
 **Command Injection Prevention:**
+
 - ✅ Allowlisted Git commands only
 - ✅ Argument sanitization with regex filtering
 - ✅ Path traversal attack prevention
 - ✅ No shell metacharacters allowed
 
 **Input Validation:**
+
 - ✅ File path validation with security patterns
 - ✅ Request size limits (10MB default)
 - ✅ Comment length restrictions
 - ✅ Type checking on all inputs
 
 **Rate Limiting:**
+
 - ✅ 50 requests per 15 minutes (general)
 - ✅ 10 exports per 15 minutes (specific)
 - ✅ IP-based tracking
 - ✅ Configurable limits
 
 **Security Headers:**
+
 - ✅ Content Security Policy (CSP)
 - ✅ X-Frame-Options: DENY
 - ✅ X-Content-Type-Options: nosniff
@@ -439,6 +487,7 @@ ai-visual-code-review/
 - ✅ Referrer Policy configured
 
 **Production Hardening:**
+
 - ✅ Error details hidden in production
 - ✅ Sensitive data filtering in logs
 - ✅ CORS restrictions
@@ -449,12 +498,14 @@ ai-visual-code-review/
 ### Common Issues
 
 **"No staged changes found"**
+
 ```bash
 git add .
 git status  # Verify files are staged
 ```
 
 **"Port 3002 already in use"**
+
 ```bash
 # Kill existing process
 lsof -ti:3002 | xargs kill
@@ -463,6 +514,7 @@ ai-review start --port 3003
 ```
 
 **"Git command failed"**
+
 ```bash
 # Check Git installation
 git --version
@@ -471,6 +523,7 @@ git status
 ```
 
 **"Module not found: express"**
+
 ```bash
 npm install
 # Or global installation
@@ -480,11 +533,13 @@ npm install -g ai-visual-code-review
 ### Performance Issues
 
 **Large repositories:**
+
 - Use file filtering: `--exclude` or `--include`
 - Set size limits: `--max-size 5000`
 - Focus on specific directories
 
 **Slow diff generation:**
+
 - Stage fewer files at once
 - Use `git add [specific-files]` instead of `git add .`
 - Configure Git diff algorithm: `git config diff.algorithm patience`
@@ -492,24 +547,28 @@ npm install -g ai-visual-code-review
 ## 📈 Examples
 
 ### React/TypeScript Project
+
 ```bash
 # Focus on source code, exclude generated files
 ai-review quick --include "src/**/*.ts" "src/**/*.tsx" --exclude "dist/*" "*.d.ts"
 ```
 
 ### Node.js API Project
+
 ```bash
 # Include API routes and exclude logs
 ai-review quick --include "routes/**" "middleware/**" "models/**" --exclude "*.log" "node_modules/*"
 ```
 
 ### Python Project
+
 ```bash
 # Include Python files, exclude virtual environment
 ai-review quick --include "*.py" --exclude "venv/*" "__pycache__/*" "*.pyc"
 ```
 
 ### Full-stack Project
+
 ```bash
 # Separate frontend and backend reviews
 ai-review quick --include "frontend/**" > frontend_review.md
@@ -521,12 +580,14 @@ ai-review quick --include "backend/**" > backend_review.md
 Contributions are welcome! Please feel free to submit pull requests.
 
 ### Development Setup
+
 1. Fork the repository
 2. Create feature branch: `git checkout -b feature-name`
 3. Make changes and test thoroughly
 4. Submit pull request with clear description
 
 ### Reporting Issues
+
 - Use GitHub Issues with detailed reproduction steps
 - Include system information (OS, Node.js version, Git version)
 - Provide sample repository if possible
@@ -545,4 +606,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Happy Reviewing!** 🔍✨
 
-For more information, visit: https://github.com/PrakharMNNIT/ai-visual-code-review
+For more information, visit: <https://github.com/PrakharMNNIT/ai-visual-code-review>

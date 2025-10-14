@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// 🔧 FIXED VERSION of bin/ai-review.js
+// This version properly passes arguments to the bash script
+
 const { execSync, spawn } = require('child_process');
 const path = require('path');
 
@@ -16,15 +19,24 @@ Commands:
   quick, q           Generate quick AI review markdown
   help, h            Show this help message
 
-Options:
+Options (for 'start' command):
   --port, -p         Port number (default: 3002)
   --open, -o         Open browser automatically
 
+Options (for 'quick' command):
+  --exclude FILES... Exclude specific files (space-separated)
+  --include FILES... ONLY include specific files
+  --max-size LINES   Skip files larger than LINES (default: 10000)
+  --no-size-limit    Include all files regardless of size
+
 Examples:
-  ai-review                    # Start visual server
-  ai-review start --port 3003  # Start on custom port
-  ai-review quick              # Quick markdown generation
-  ai-review --help             # Show help
+  ai-review                          # Start visual server
+  ai-review start --port 3003        # Start on custom port
+  ai-review quick                    # Quick markdown generation
+  ai-review quick --include "src/**/*.ts"
+  ai-review quick --exclude "*.log" "dist/*"
+  ai-review quick --no-size-limit
+  ai-review --help                   # Show help
 
 Repository: https://github.com/PrakharMNNIT/ai-visual-code-review
   `);
@@ -96,14 +108,23 @@ function quickReview(additionalArgs = []) {
     process.exit(1);
   }
 
-  const scriptPath = path.join(__dirname, '..', 'scripts', 'export-ai-review.js');
+  const scriptPath = path.join(__dirname, '..', 'scripts', 'quick-ai-review.sh');
 
   try {
-    // Build command with arguments
-    const argsString = additionalArgs.join(' ');
+    execSync(`chmod +x "${scriptPath}"`, { stdio: 'ignore' });
+
+    // 🔧 FIX: Properly pass additional arguments to bash script
+    const argsString = additionalArgs.map(arg => {
+      // Quote arguments that contain spaces or special characters
+      if (arg.includes(' ') || arg.includes('*') || arg.includes('?')) {
+        return `'${arg}'`;
+      }
+      return arg;
+    }).join(' ');
+
     const command = argsString
-      ? `node "${scriptPath}" ${argsString}`
-      : `node "${scriptPath}"`;
+      ? `"${scriptPath}" ${argsString}`
+      : `"${scriptPath}"`;
 
     console.log(`🔍 Running: ${command}`);
     execSync(command, { stdio: 'inherit', cwd: process.cwd() });
@@ -178,7 +199,7 @@ if (['start', 'serve', 's'].includes(command)) {
   startServer(port, openBrowser);
 
 } else if (['quick', 'q'].includes(command)) {
-  // Pass all remaining arguments to quick review
+  // 🔧 FIX: Pass all remaining arguments to quick review
   const quickArgs = args.slice(commandIndex + 1);
   quickReview(quickArgs);
 

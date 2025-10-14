@@ -1,6 +1,6 @@
 {
   "name": "ai-visual-code-review",
-  "version": "1.0.4",
+  "version": "2.1.0",
   "description": "A comprehensive visual code review system with AI integration for any Git repository",
   "main": "server.js",
   "bin": {
@@ -32,14 +32,14 @@
   "author": "AI Code Review System",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
   },
   "devDependencies": {
+    "eslint": "^8.50.0",
     "jest": "^29.7.0",
-    "supertest": "^6.3.3",
     "nodemon": "^3.0.1",
-    "eslint": "^8.50.0"
+    "supertest": "^6.3.3"
   },
   "jest": {
     "testEnvironment": "node",
