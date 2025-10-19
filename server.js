@@ -6,6 +6,7 @@ const { writeFileSync, readFileSync, existsSync, mkdirSync } = require('fs');
 const path = require('path');
 const cors = require('cors');
 const DiffService = require('./services/diffService');
+const GitStatusParser = require('./services/gitStatusParser');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -346,16 +347,50 @@ app.get('/api/staged-files', handleAsyncRoute(async (req, res) => {
     const output = await executeGitCommand('diff-cached-names');
     const files = output.trim() ? output.trim().split('\n').filter(f => f.length > 0) : [];
 
+    // Get file statuses to determine if files are deleted
+    let fileStatuses = {};
+    try {
+      const statusOutput = await executeGitCommand('diff-cached', ['--name-status']);
+      const statusLines = statusOutput.trim().split('\n').filter(line => line.length > 0);
+      statusLines.forEach(line => {
+        const [status, filename] = line.split('\t');
+        if (filename) {
+          fileStatuses[filename] = status;
+        }
+      });
+    } catch (error) {
+      // Ignore error, fileStatuses will remain empty
+    }
+
+    // Check for unstaged deleted files
+    let deletedFiles = [];
+    try {
+      const deletedOutput = await executeGitCommand('status-porcelain');
+      const deletedLines = deletedOutput.trim().split('\n').filter(line =>
+        line.length > 0 && (line.startsWith(' D') || line.startsWith('AD'))
+      );
+      deletedFiles = deletedLines.map(line => line.substring(line.startsWith('AD') ? 3 : 3));
+    } catch (error) {
+      // Ignore error, deletedFiles will remain empty
+    }
+
     res.json({
       files,
       count: files.length,
-      timestamp: new Date().toISOString()
+      fileStatuses,
+      deletedFiles,
+      deletedCount: deletedFiles.length,
+      timestamp: new Date().toISOString(),
+      hasUnstagedDeletions: deletedFiles.length > 0
     });
   } catch (error) {
     console.warn('Failed to get staged files:', error.message);
     res.json({
       files: [],
       count: 0,
+      fileStatuses: {},
+      deletedFiles: [],
+      deletedCount: 0,
       error: 'No staged files found'
     });
   }
@@ -520,12 +555,35 @@ app.post('/api/export-for-ai', exportRateLimit, handleAsyncRoute(async (req, res
     const stagedFiles = stagedOutput.trim() ?
       stagedOutput.trim().split('\n').filter(f => f.length > 0) : [];
 
-    console.log('📁 All staged files:', stagedFiles.length);
+    // Check for unstaged deleted files
+    let deletedFiles = [];
+    try {
+      const deletedOutput = await executeGitCommand('status-porcelain');
+      const deletedLines = deletedOutput.trim().split('\n').filter(line =>
+        line.length > 0 && line.startsWith(' D')
+      );
+      deletedFiles = deletedLines.map(line => line.substring(3));
+    } catch (error) {
+      // Ignore error, deletedFiles will remain empty
+    }
 
-    if (stagedFiles.length === 0) {
+    console.log('📁 All staged files:', stagedFiles.length);
+    if (deletedFiles.length > 0) {
+      console.log(`ℹ️  Note: ${deletedFiles.length} unstaged deleted file(s) found`);
+    }
+
+    if (stagedFiles.length === 0 && deletedFiles.length === 0) {
       return res.status(400).json({
         success: false,
         error: 'No staged files found. Please run "git add ." first.',
+        timestamp: new Date().toISOString()
+      });
+    } else if (stagedFiles.length === 0 && deletedFiles.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: `Found ${deletedFiles.length} deleted file(s) but they are not staged. Use "git add -A" to stage all changes including deletions.`,
+        deletedFiles: deletedFiles,
+        suggestion: 'Run "git add -A" to stage all changes, then try again.',
         timestamp: new Date().toISOString()
       });
     }
@@ -575,33 +633,71 @@ ${excludedFiles.map(f => `- \`${f}\``).join('\n')}
       try {
         console.log(`✅ Processing: ${file}`);
 
-        content += `\n### 📄 \`${file}\`\n\n`;
+        // Get file status using GitStatusParser
+        let fileStatus = 'M '; // default to Modified
+        try {
+          const statusOutput = await executeGitCommand('diff-cached', ['--name-status']);
+          const statusLines = statusOutput.trim().split('\n');
+          for (const line of statusLines) {
+            const [status, filename] = line.split('\t');
+            if (filename === file) {
+              fileStatus = status;
+              break;
+            }
+          }
+        } catch (error) {
+          // Ignore error, use defaults
+        }
 
-        // Add file type context with enhanced detection
-        const ext = path.extname(file).toLowerCase();
-        const fileTypeMap = {
-          '.tsx': '**Type:** TypeScript React Component ⚛️\n\n',
-          '.ts': '**Type:** TypeScript Source File 📘\n\n',
-          '.js': '**Type:** JavaScript Source File 🟨\n\n',
-          '.jsx': '**Type:** React Component (JavaScript) ⚛️\n\n',
-          '.json': '**Type:** Configuration/Data File 📋\n\n',
-          '.md': '**Type:** Documentation 📖\n\n',
-          '.css': '**Type:** Stylesheet 🎨\n\n',
-          '.scss': '**Type:** Sass Stylesheet 🎨\n\n',
-          '.html': '**Type:** HTML Template 🌐\n\n',
-          '.py': '**Type:** Python Script 🐍\n\n',
-          '.sh': '**Type:** Shell Script 💻\n\n'
-        };
-        content += fileTypeMap[ext] || '**Type:** Source File 📄\n\n';
+        // Parse status using comprehensive GitStatusParser
+        const statusInfo = GitStatusParser.parse(fileStatus);
+
+        // Add appropriate header using parser
+        content += `\n${GitStatusParser.getMarkdownHeader(fileStatus, file)}\n\n`;
+
+        // Add status message if needed
+        const statusMessage = GitStatusParser.getStatusMessage(fileStatus);
+        if (statusMessage) {
+          content += `${statusMessage}\n\n`;
+        }
+
+        // Add file type context with enhanced detection (only if not deleted)
+        if (!statusInfo.isDeleted) {
+          const ext = path.extname(file).toLowerCase();
+          const fileTypeMap = {
+            '.tsx': '**Type:** TypeScript React Component ⚛️\n\n',
+            '.ts': '**Type:** TypeScript Source File 📘\n\n',
+            '.js': '**Type:** JavaScript Source File 🟨\n\n',
+            '.jsx': '**Type:** React Component (JavaScript) ⚛️\n\n',
+            '.json': '**Type:** Configuration/Data File 📋\n\n',
+            '.md': '**Type:** Documentation 📖\n\n',
+            '.css': '**Type:** Stylesheet 🎨\n\n',
+            '.scss': '**Type:** Sass Stylesheet 🎨\n\n',
+            '.html': '**Type:** HTML Template 🌐\n\n',
+            '.py': '**Type:** Python Script 🐍\n\n',
+            '.sh': '**Type:** Shell Script 💻\n\n'
+          };
+          content += fileTypeMap[ext] || '**Type:** Source File 📄\n\n';
+        }
 
         // Add file comment if exists
         if (comments && comments[file]) {
           content += `**💭 Review Comment:**\n${comments[file]}\n\n`;
         }
 
-        // Add diff with enhanced line numbers using DiffService
-        const diff = await executeGitCommand('diff-cached', ['--', file]);
-        content += DiffService.generateEnhancedDiffMarkdown(diff);
+        // Get diff - handle all file status types
+        try {
+          const diff = await executeGitCommand('diff-cached', ['--', file]);
+          content += DiffService.generateEnhancedDiffMarkdown(diff);
+        } catch (diffError) {
+          // For deleted files, this is expected - they don't have diff content
+          if (statusInfo.isDeleted) {
+            console.log(`ℹ️  File ${file} is deleted - no diff content to show`);
+            content += `**Note:** This file was completely removed and has no diff content to display.\n\n`;
+          } else {
+            throw diffError;
+          }
+        }
 
         processedCount++;
       } catch (error) {
@@ -722,10 +818,30 @@ app.post('/api/export-individual-reviews', exportRateLimit, handleAsyncRoute(asy
     const stagedFiles = stagedOutput.trim() ?
       stagedOutput.trim().split('\n').filter(f => f.length > 0) : [];
 
-    if (stagedFiles.length === 0) {
+    // Check for unstaged deleted files
+    let deletedFiles = [];
+    try {
+      const deletedOutput = await executeGitCommand('status-porcelain');
+      const deletedLines = deletedOutput.trim().split('\n').filter(line =>
+        line.length > 0 && line.startsWith(' D')
+      );
+      deletedFiles = deletedLines.map(line => line.substring(3));
+    } catch (error) {
+      // Ignore error, deletedFiles will remain empty
+    }
+
+    if (stagedFiles.length === 0 && deletedFiles.length === 0) {
       return res.status(400).json({
         success: false,
         error: 'No staged files found. Please run "git add ." first.',
+        timestamp: new Date().toISOString()
+      });
+    } else if (stagedFiles.length === 0 && deletedFiles.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: `Found ${deletedFiles.length} deleted file(s) but they are not staged. Use "git add -A" to stage all changes including deletions.`,
+        deletedFiles: deletedFiles,
+        suggestion: 'Run "git add -A" to stage all changes, then try again.',
         timestamp: new Date().toISOString()
       });
     }

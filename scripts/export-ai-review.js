@@ -12,6 +12,7 @@ const path = require('path');
 
 // Import DiffService for consistent formatting
 const DiffService = require('../services/diffService');
+const GitStatusParser = require('../services/gitStatusParser');
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -104,8 +105,10 @@ try {
   process.exit(1);
 }
 
-// Check if there are staged changes
+// Check if there are staged changes or unstaged deletions
 let stagedFiles = [];
+let deletedFiles = [];
+
 try {
   const output = execSync('git diff --cached --name-only', { encoding: 'utf-8' });
   stagedFiles = output.trim() ? output.trim().split('\n').filter(f => f.length > 0) : [];
@@ -114,13 +117,30 @@ try {
   process.exit(1);
 }
 
-if (stagedFiles.length === 0) {
+try {
+  const deletedOutput = execSync('git ls-files --deleted', { encoding: 'utf-8' });
+  deletedFiles = deletedOutput.trim() ? deletedOutput.trim().split('\n').filter(f => f.length > 0) : [];
+} catch (error) {
+  // Ignore error, deletedFiles will remain empty
+}
+
+if (stagedFiles.length === 0 && deletedFiles.length === 0) {
   console.error('⚠️  No staged changes found');
   console.error('💡 Run \'git add .\' to stage changes, then try again');
   process.exit(1);
+} else if (stagedFiles.length === 0 && deletedFiles.length > 0) {
+  console.error(`⚠️  Found ${deletedFiles.length} deleted file(s) but they are not staged`);
+  console.error('💡 To include deleted files in review:');
+  console.error('   • Stage all changes: git add -A');
+  console.error('   • Or stage specific deleted files: git rm <filename>');
+  console.error('   • Then try again');
+  process.exit(1);
+} else {
+  console.log(`✅ Found ${stagedFiles.length} staged files`);
+  if (deletedFiles.length > 0) {
+    console.log(`ℹ️  Note: ${deletedFiles.length} unstaged deleted file(s) will not be included`);
+  }
 }
-
-console.log(`✅ Found ${stagedFiles.length} staged files`);
 
 // Function to check if file should be processed
 function shouldProcessFile(file) {
@@ -266,30 +286,58 @@ for (const file of includedFiles) {
   try {
     console.log(`✅ Processing: ${file}`);
 
-    content += `\n### 📄 \`${file}\`\n\n`;
+    // Get file status using GitStatusParser
+    let fileStatus = 'M '; // default to Modified
+    try {
+      const statusOutput = execSync('git diff --cached --name-status', { encoding: 'utf-8' });
+      const statusLines = statusOutput.trim().split('\n');
+      for (const line of statusLines) {
+        const [status, filename] = line.split('\t');
+        if (filename === file) {
+          fileStatus = status;
+          break;
+        }
+      }
+    } catch (error) {
+      // Ignore error, use defaults
+    }
 
-    // Add file type context
-    const ext = path.extname(file).toLowerCase();
-    const fileTypeMap = {
-      '.tsx': '**Type:** TypeScript React Component ⚛️\n\n',
-      '.ts': '**Type:** TypeScript Source File 📘\n\n',
-      '.js': '**Type:** JavaScript Source File 🟨\n\n',
-      '.jsx': '**Type:** React Component (JavaScript) ⚛️\n\n',
-      '.json': '**Type:** Configuration/Data File 📋\n\n',
-      '.md': '**Type:** Documentation 📖\n\n',
-      '.css': '**Type:** Stylesheet 🎨\n\n',
-      '.scss': '**Type:** Sass Stylesheet 🎨\n\n',
-      '.html': '**Type:** HTML Template 🌐\n\n',
-      '.py': '**Type:** Python Script 🐍\n\n',
-      '.sh': '**Type:** Shell Script 💻\n\n',
-      '.vue': '**Type:** Vue Component 💚\n\n',
-      '.yaml': '**Type:** YAML Configuration 📋\n\n',
-      '.yml': '**Type:** YAML Configuration 📋\n\n',
-      '.toml': '**Type:** TOML Configuration 📋\n\n'
-    };
-    content += fileTypeMap[ext] || '**Type:** Source File 📄\n\n';
+    // Parse status using comprehensive GitStatusParser
+    const statusInfo = GitStatusParser.parse(fileStatus);
 
-    // Get diff - handle both new files and modifications
+    // Add appropriate header using parser
+    content += `\n${GitStatusParser.getMarkdownHeader(fileStatus, file)}\n\n`;
+
+    // Add status message if needed
+    const statusMessage = GitStatusParser.getStatusMessage(fileStatus);
+    if (statusMessage) {
+      content += `${statusMessage}\n\n`;
+    }
+
+    // Add file type context (only if not deleted)
+    if (!statusInfo.isDeleted) {
+      const ext = path.extname(file).toLowerCase();
+      const fileTypeMap = {
+        '.tsx': '**Type:** TypeScript React Component ⚛️\n\n',
+        '.ts': '**Type:** TypeScript Source File 📘\n\n',
+        '.js': '**Type:** JavaScript Source File 🟨\n\n',
+        '.jsx': '**Type:** React Component (JavaScript) ⚛️\n\n',
+        '.json': '**Type:** Configuration/Data File 📋\n\n',
+        '.md': '**Type:** Documentation 📖\n\n',
+        '.css': '**Type:** Stylesheet 🎨\n\n',
+        '.scss': '**Type:** Sass Stylesheet 🎨\n\n',
+        '.html': '**Type:** HTML Template 🌐\n\n',
+        '.py': '**Type:** Python Script 🐍\n\n',
+        '.sh': '**Type:** Shell Script 💻\n\n',
+        '.vue': '**Type:** Vue Component 💚\n\n',
+        '.yaml': '**Type:** YAML Configuration 📋\n\n',
+        '.yml': '**Type:** YAML Configuration 📋\n\n',
+        '.toml': '**Type:** TOML Configuration 📋\n\n'
+      };
+      content += fileTypeMap[ext] || '**Type:** Source File 📄\n\n';
+    }
+
+    // Get diff - handle all file status types
     let diff;
     try {
       diff = execSync(`git diff --cached -- "${file}"`, { encoding: 'utf-8' });
@@ -299,17 +347,13 @@ for (const file of includedFiles) {
         throw new Error('File may be deleted or has no diff');
       }
     } catch (diffError) {
-      // Try checking if file is deleted
-      try {
-        const status = execSync(`git status --short "${file}"`, { encoding: 'utf-8' });
-        if (status.trim().startsWith('D')) {
-          content += `**Status:** File deleted ❌\n\n`;
-          processedCount++;
-          continue;
-        }
-      } catch (statusError) {
-        throw diffError;
+      // For deleted files, this is expected - still count as processed
+      if (statusInfo.isDeleted) {
+        console.log(`ℹ️  File ${file} is deleted - no diff content to show`);
+        processedCount++;
+        continue;
       }
+      throw diffError;
     }
 
     // Use DiffService for consistent formatting with line numbers

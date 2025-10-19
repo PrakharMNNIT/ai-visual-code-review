@@ -1125,31 +1125,43 @@
                     const fileName = file.substring(file.lastIndexOf('/') + 1);
                     const filePath = file.substring(0, file.lastIndexOf('/')) || '.';
 
+                    // Determine file status from API response
+                    const fileStatus = data.fileStatuses && data.fileStatuses[file];
                     let badgeClass = 'modified';
                     let badgeText = 'Modified';
                     let fileIcon = '📄';
                     let fileTypeDesc = 'File';
 
-                    // Enhanced file type detection
-                    const fileTypeMap = {
-                        '.tsx': { icon: '⚛️', desc: 'TypeScript React' },
-                        '.ts': { icon: '📘', desc: 'TypeScript' },
-                        '.js': { icon: '🟨', desc: 'JavaScript' },
-                        '.jsx': { icon: '⚛️', desc: 'React Component' },
-                        '.json': { icon: '📋', desc: 'JSON Config' },
-                        '.md': { icon: '📖', desc: 'Markdown' },
-                        '.css': { icon: '🎨', desc: 'Stylesheet' },
-                        '.scss': { icon: '🎨', desc: 'Sass' },
-                        '.html': { icon: '🌐', desc: 'HTML' },
-                        '.py': { icon: '🐍', desc: 'Python' },
-                        '.sh': { icon: '💻', desc: 'Shell Script' },
-                        '.yml': { icon: '⚙️', desc: 'YAML Config' },
-                        '.yaml': { icon: '⚙️', desc: 'YAML Config' }
-                    };
+                    // Parse git status using simplified GitStatusParser logic
+                    const statusInfo = parseGitStatus(fileStatus || 'M');
+                    badgeClass = statusInfo.badgeClass;
+                    badgeText = statusInfo.badgeText;
+                    fileIcon = statusInfo.icon;
 
-                    if (fileTypeMap[fileExt]) {
-                        fileIcon = fileTypeMap[fileExt].icon;
-                        fileTypeDesc = fileTypeMap[fileExt].desc;
+                    // Enhanced file type detection (override icon only if not deleted)
+                    if (fileStatus !== 'D') {
+                        const fileTypeMap = {
+                            '.tsx': { icon: '⚛️', desc: 'TypeScript React' },
+                            '.ts': { icon: '📘', desc: 'TypeScript' },
+                            '.js': { icon: '🟨', desc: 'JavaScript' },
+                            '.jsx': { icon: '⚛️', desc: 'React Component' },
+                            '.json': { icon: '📋', desc: 'JSON Config' },
+                            '.md': { icon: '📖', desc: 'Markdown' },
+                            '.css': { icon: '🎨', desc: 'Stylesheet' },
+                            '.scss': { icon: '🎨', desc: 'Sass' },
+                            '.html': { icon: '🌐', desc: 'HTML' },
+                            '.py': { icon: '🐍', desc: 'Python' },
+                            '.sh': { icon: '💻', desc: 'Shell Script' },
+                            '.yml': { icon: '⚙️', desc: 'YAML Config' },
+                            '.yaml': { icon: '⚙️', desc: 'YAML Config' }
+                        };
+
+                        if (fileTypeMap[fileExt]) {
+                            fileIcon = fileTypeMap[fileExt].icon;
+                            fileTypeDesc = fileTypeMap[fileExt].desc;
+                        }
+                    } else {
+                        fileTypeDesc = 'Deleted File';
                     }
 
                     // Add file to selected set by default
@@ -1609,6 +1621,44 @@
         setInterval(async () => {
             await loadHealthCheck();
         }, 30000);
+
+        // Simplified GitStatusParser logic for frontend
+        function parseGitStatus(statusCode) {
+            const status = statusCode || 'M';
+
+            // Handle comprehensive git status combinations
+            if (status.includes('D')) {
+                return { badgeClass: 'deleted', badgeText: getStatusLabel(status), icon: '🗑️' };
+            } else if (status.includes('U')) {
+                return { badgeClass: 'modified', badgeText: 'Conflict', icon: '⚠️' };
+            } else if (status[0] === 'A' || status[0] === 'C') {
+                return { badgeClass: 'added', badgeText: getStatusLabel(status), icon: '✨' };
+            } else if (status.includes('R')) {
+                return { badgeClass: 'modified', badgeText: getStatusLabel(status), icon: '🔄' };
+            } else {
+                return { badgeClass: 'modified', badgeText: getStatusLabel(status), icon: '📝' };
+            }
+        }
+
+        function getStatusLabel(statusCode) {
+            const statusMap = {
+                'M': 'Modified',
+                'A': 'Added',
+                'D': 'Deleted',
+                'R': 'Renamed',
+                'C': 'Copied',
+                'U': 'Conflict',
+                'AD': 'Added→Deleted',
+                'AM': 'Added→Modified',
+                'MD': 'Modified→Deleted',
+                'RM': 'Renamed→Modified',
+                'RD': 'Renamed→Deleted',
+                'UD': 'Conflict→Deleted',
+                'AU': 'Added→Conflict'
+            };
+
+            return statusMap[statusCode] || 'Modified';
+        }
 
         // Initialize when page loads
         init();

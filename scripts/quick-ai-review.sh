@@ -100,13 +100,26 @@ fi
 
 echo "📏 Max file size: $MAX_FILE_SIZE lines"
 
-# Check if there are staged changes
-if git diff --cached --quiet; then
+# Check if there are staged changes or unstaged deletions
+STAGED_CHANGES=$(git diff --cached --name-only | wc -l)
+DELETED_FILES=$(git ls-files --deleted | wc -l)
+
+if [ "$STAGED_CHANGES" -eq 0 ] && [ "$DELETED_FILES" -eq 0 ]; then
     echo "⚠️  No staged changes found"
     echo "💡 Run 'git add .' to stage changes, then try again"
     exit 1
+elif [ "$STAGED_CHANGES" -eq 0 ] && [ "$DELETED_FILES" -gt 0 ]; then
+    echo "⚠️  Found $DELETED_FILES deleted file(s) but they are not staged"
+    echo "💡 To include deleted files in review:"
+    echo "   • Stage all changes: git add -A"
+    echo "   • Or stage specific deleted files: git rm <filename>"
+    echo "   • Then try again"
+    exit 1
 else
     echo "✅ Found staged changes"
+    if [ "$DELETED_FILES" -gt 0 ]; then
+        echo "ℹ️  Note: $DELETED_FILES unstaged deleted file(s) will not be included"
+    fi
 fi
 
 echo "📊 Generating review file..."
@@ -226,40 +239,65 @@ for file in "${STAGED_FILES[@]}"; do
         echo "### 📄 \`$file\`" >> AI_REVIEW.md
         echo "" >> AI_REVIEW.md
 
-        # Add file type context
-        case "$file" in
-            *.tsx|*.ts)
-                echo "**Type:** TypeScript/React Component" >> AI_REVIEW.md
-                ;;
-            *.js|*.jsx)
-                echo "**Type:** JavaScript" >> AI_REVIEW.md
-                ;;
-            *.json)
-                echo "**Type:** Configuration/Data" >> AI_REVIEW.md
-                ;;
-            *.md)
-                echo "**Type:** Documentation" >> AI_REVIEW.md
-                ;;
-            *.css|*.scss|*.less)
-                echo "**Type:** Stylesheet" >> AI_REVIEW.md
-                ;;
-            *.html|*.htm)
-                echo "**Type:** HTML Template" >> AI_REVIEW.md
-                ;;
-            *.py)
-                echo "**Type:** Python Script" >> AI_REVIEW.md
-                ;;
-            *.sh)
-                echo "**Type:** Shell Script" >> AI_REVIEW.md
-                ;;
-            *)
-                echo "**Type:** Source File" >> AI_REVIEW.md
-                ;;
-        esac
+        # Check if file is deleted
+        if ! git diff --cached --name-status | grep -q "^D.*$file$"; then
+            # File exists or is modified/added - add file type context
+            case "$file" in
+                *.tsx|*.ts)
+                    echo "**Type:** TypeScript/React Component" >> AI_REVIEW.md
+                    ;;
+                *.js|*.jsx)
+                    echo "**Type:** JavaScript" >> AI_REVIEW.md
+                    ;;
+                *.json)
+                    echo "**Type:** Configuration/Data" >> AI_REVIEW.md
+                    ;;
+                *.md)
+                    echo "**Type:** Documentation" >> AI_REVIEW.md
+                    ;;
+                *.css|*.scss|*.less)
+                    echo "**Type:** Stylesheet" >> AI_REVIEW.md
+                    ;;
+                *.html|*.htm)
+                    echo "**Type:** HTML Template" >> AI_REVIEW.md
+                    ;;
+                *.py)
+                    echo "**Type:** Python Script" >> AI_REVIEW.md
+                    ;;
+                *.sh)
+                    echo "**Type:** Shell Script" >> AI_REVIEW.md
+                    ;;
+                *)
+                    echo "**Type:** Source File" >> AI_REVIEW.md
+                    ;;
+            esac
+        else
+            # File is deleted
+            echo "**Type:** DELETED FILE" >> AI_REVIEW.md
+            echo "**Status:** This file has been completely removed" >> AI_REVIEW.md
+        fi
 
         echo "" >> AI_REVIEW.md
         echo "\`\`\`diff" >> AI_REVIEW.md
-        git diff --cached "$file" >> AI_REVIEW.md
+
+        # Check the file status to handle different scenarios
+        file_status=$(git diff --cached --name-status | grep "^[A-Z].*$file$" | cut -c1)
+
+        if [ "$file_status" = "D" ]; then
+            # File is properly deleted and staged - show the deletion diff
+            git diff --cached "$file" 2>/dev/null || echo "# File deleted but unable to show diff"
+        elif [ "$file_status" = "A" ] && [ ! -f "$file" ]; then
+            # File was staged as new but then deleted from working directory
+            # Show what would be deleted (the staged content as deleted lines)
+            echo "--- a/$file"
+            echo "+++ /dev/null"
+            echo "@@ -1,$(git show ":$file" 2>/dev/null | wc -l) +0,0 @@"
+            git show ":$file" 2>/dev/null | sed 's/^/-/' || echo "# Unable to show deleted content"
+        else
+            # Normal case - show the regular diff
+            git diff --cached "$file" 2>/dev/null || echo "# Unable to show diff for $file"
+        fi
+
         echo "\`\`\`" >> AI_REVIEW.md
         echo "" >> AI_REVIEW.md
 
