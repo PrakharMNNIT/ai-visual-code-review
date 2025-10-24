@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const express = require('express');
-const { exec } = require('child_process');
+const { exec, execFile } = require('child_process');
 const { writeFileSync, readFileSync, existsSync, mkdirSync } = require('fs');
 const path = require('path');
 const cors = require('cors');
@@ -169,16 +169,21 @@ async function executeGitCommand(commandType, args = []) {
       return true;
     });
 
-    const command = [...baseCommand, ...sanitizedArgs].join(' ');
+    // Use execFile for proper argument handling (supports spaces in paths)
+    const gitCommand = baseCommand[0]; // 'git'
+    const gitArgs = [...baseCommand.slice(1), ...sanitizedArgs];
 
-    exec(command, {
+    // For logging purposes only
+    const commandDisplay = [gitCommand, ...gitArgs].join(' ');
+
+    execFile(gitCommand, gitArgs, {
       encoding: 'utf-8',
       cwd: process.cwd(),
       timeout: CONFIG.git.timeout,
       maxBuffer: 10 * 1024 * 1024 // 10MB buffer
     }, (error, stdout, stderr) => {
       if (error) {
-        console.error(`Git command failed: ${command}`, stderr);
+        console.error(`Git command failed: ${commandDisplay}`, stderr);
         reject(new Error(`Git operation failed: ${error.message}`));
       } else {
         resolve(stdout);
