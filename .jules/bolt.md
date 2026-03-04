@@ -8,3 +8,7 @@
 ## 2026-03-05 - Parallelize independent Git CLI operations in API endpoints
 **Learning:** A common performance bottleneck in the server codebase was the sequential execution of independent Git commands via `GitService.execute()` in API endpoints. For example, in `/api/health`, `/api/staged-files`, `/api/export-for-ai`, and `/api/export-individual-reviews`, the server awaited the result of one Git process (like getting staged file names) before spawning another (like checking `status-porcelain`). Because each `execFile` spawns a new child process and incurs I/O overhead, chaining them sequentially unnecessarily compounds latency.
 **Action:** When an endpoint needs multiple distinct pieces of Git state that don't depend on each other, always execute them concurrently using `Promise.all()` / `Promise.allSettled()`. This allows the Node.js event loop to spawn and await the child processes in parallel, reducing the total wait time to the duration of the slowest command rather than the sum of all commands.
+
+## 2026-03-04 - Parallelize independent Git CLI commands
+**Learning:** Sequential execution of Git CLI commands (via `child_process.execFile`) adds unnecessary latency to endpoints like `/api/staged-files` and `/api/health`. These commands are independent and can be safely parallelized.
+**Action:** Always look for opportunities to run independent asynchronous operations concurrently using `Promise.all` to reduce response times, especially for operations that wrap CLI calls.
