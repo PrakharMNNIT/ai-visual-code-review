@@ -97,7 +97,7 @@ const requestLogger = (req, res, next) => {
 
     const userAgent = req.get('User-Agent') || '';
     const queryString = JSON.stringify(req.query);
-    const fullUrl = req.path + (req.query ? '?' + new URLSearchParams(req.query).toString() : '');
+    const fullUrl = req.path + (req.query ? `?${  new URLSearchParams(req.query).toString()}` : '');
 
     const suspiciousFound = suspiciousPatterns.some(pattern =>
       pattern.test(fullUrl) ||
@@ -178,7 +178,8 @@ function validateFileRequest(file) {
 
   // Additional checks for suspicious patterns
   const suspiciousPatterns = [
-    /\x00/,           // Null bytes
+    // eslint-disable-next-line no-control-regex
+    /\u0000/,           // Null bytes
     /[<>"|*?]/,       // Dangerous file characters
     /^\//,            // Absolute paths
     /^[a-zA-Z]:\\/,   // Windows absolute paths
@@ -596,7 +597,7 @@ app.post('/api/export-for-ai', exportRateLimit, handleAsyncRoute(async (req, res
       return res.status(400).json({
         success: false,
         error: `Found ${deletedFiles.length} deleted file(s) but they are not staged. Use "git add -A" to stage all changes including deletions.`,
-        deletedFiles: deletedFiles,
+        deletedFiles,
         suggestion: 'Run "git add -A" to stage all changes, then try again.',
         timestamp: new Date().toISOString()
       });
@@ -696,7 +697,7 @@ app.post('/api/export-individual-reviews', exportRateLimit, handleAsyncRoute(asy
       return res.status(400).json({
         success: false,
         error: `Found ${deletedFiles.length} deleted file(s) but they are not staged.Use "git add -A" to stage all changes including deletions.`,
-        deletedFiles: deletedFiles,
+        deletedFiles,
         suggestion: 'Run "git add -A" to stage all changes, then try again.',
         timestamp: new Date().toISOString()
       });
