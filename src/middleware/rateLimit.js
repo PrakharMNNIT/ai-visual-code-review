@@ -34,8 +34,16 @@ function createRateLimit(maxRequests, windowMs) {
     }
 
     const requests = rateLimitStore.get(key);
-    // Clean old requests atomically
-    const validRequests = requests.filter(time => now - time < windowMs);
+
+    // ⚡ Bolt Optimization: Early exit eviction
+    // Since requests are added chronologically, we can find the first valid
+    // request index and slice instead of iterating the entire array with filter()
+    let firstValidIndex = 0;
+    while (firstValidIndex < requests.length && now - requests[firstValidIndex] >= windowMs) {
+      firstValidIndex++;
+    }
+
+    const validRequests = firstValidIndex > 0 ? requests.slice(firstValidIndex) : requests;
 
     if (validRequests.length >= maxRequests) {
       console.warn(`🚫 Rate limit exceeded for ${ip}: ${validRequests.length}/${maxRequests} requests in ${windowMs / 1000}s`);
