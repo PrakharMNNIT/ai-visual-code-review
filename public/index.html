@@ -702,8 +702,8 @@
             ></textarea>
 
             <div class="modal-actions">
-                <button class="modal-btn secondary" onclick="closeCommentModal()">Cancel</button>
-                <button class="modal-btn primary" onclick="saveComment()">💾 Save Comment</button>
+                <button class="modal-btn secondary" onclick="closeCommentModal()" title="Cancel (Esc)">Cancel <kbd>Esc</kbd></button>
+                <button class="modal-btn primary" onclick="saveComment()" title="Save Comment (Ctrl+Enter)">💾 Save Comment <kbd>Ctrl+Enter</kbd></button>
             </div>
         </div>
     </div>
@@ -896,7 +896,7 @@
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span>${this.getIcon(type)}</span>
                         <span>${message}</span>
-                        <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px; margin-left: auto;">×</button>
+                        <button onclick="this.parentElement.parentElement.remove()" aria-label="Close notification" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px; margin-left: auto;">×</button>
                     </div>
                 `;
 

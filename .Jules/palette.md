@@ -4,3 +4,6 @@
 ## 2026-03-10 - Keyboard Accessible Vanilla JS Accordions
 **Learning:** When making `div`-based custom accordions accessible, applying a `:focus-visible` outline helps keyboard users without showing outlines to mouse users. Additionally, an `onkeydown` handler for 'Enter' or 'Space' must call `event.preventDefault()` to stop the page from scrolling when the Space key is pressed. Managing `aria-expanded` and `aria-controls` states programmatically during JS expand/collapse functions ensures screen readers correctly announce the state.
 **Action:** Always include `event.preventDefault()` when mapping the 'Space' key to click actions on non-button custom elements. Ensure the state of `aria-expanded` strictly mirrors the visual expand/collapse state updated in the DOM event handlers.
+## 2026-06-24 - Added Keyboard Shortcut Hints to Modal Buttons
+**Learning:** Users often miss existing keyboard shortcuts (like Esc to cancel or Ctrl+Enter to save) if they aren't visibly documented in the UI. Adding simple <kbd> hints inside action buttons improves discoverability significantly.
+**Action:** Add inline visual hints using the <kbd> tag or similar styling for primary interactions that have keyboard shortcuts to make power-user workflows more apparent without adding clutter.
