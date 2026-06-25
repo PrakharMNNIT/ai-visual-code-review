@@ -633,11 +633,11 @@
                 <span id="projectName" style="color: #58a6ff; font-size: 14px; font-weight: 500;">Loading...</span>
             </div>
             <div style="display: flex; gap: 12px;">
-                <button class="export-btn" onclick="exportForAI()" id="exportBtn">
+                <button class="export-btn" onclick="exportForAI()" id="exportBtn" aria-label="Export for AI Review">
                     <span>📤</span>
                     Export for AI Review
                 </button>
-                <button class="export-btn" style="background: linear-gradient(135deg, #1f6feb, #58a6ff);" onclick="exportIndividualReviews()" id="exportIndividualBtn">
+                <button class="export-btn" style="background: linear-gradient(135deg, #1f6feb, #58a6ff);" onclick="exportIndividualReviews()" id="exportIndividualBtn" aria-label="Export Individual Files">
                     <span>📁</span>
                     Export Individual Files
                 </button>
@@ -656,14 +656,14 @@
             </div>
         </div>
 
-        <div class="stats" id="stats">
+        <div class="stats" id="stats" aria-live="polite">
             <div class="loading">
                 <div class="spinner"></div>
                 <span>Loading change summary...</span>
             </div>
         </div>
 
-        <div class="file-list" id="fileList">
+        <div class="file-list" id="fileList" aria-live="polite">
             <div class="loading">
                 <div class="spinner"></div>
                 <span>Loading staged files...</span>

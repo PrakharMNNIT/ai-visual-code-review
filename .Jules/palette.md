@@ -4,3 +4,6 @@
 ## 2026-03-10 - Keyboard Accessible Vanilla JS Accordions
 **Learning:** When making `div`-based custom accordions accessible, applying a `:focus-visible` outline helps keyboard users without showing outlines to mouse users. Additionally, an `onkeydown` handler for 'Enter' or 'Space' must call `event.preventDefault()` to stop the page from scrolling when the Space key is pressed. Managing `aria-expanded` and `aria-controls` states programmatically during JS expand/collapse functions ensures screen readers correctly announce the state.
 **Action:** Always include `event.preventDefault()` when mapping the 'Space' key to click actions on non-button custom elements. Ensure the state of `aria-expanded` strictly mirrors the visual expand/collapse state updated in the DOM event handlers.
+## 2026-06-23 - Accessibility of export and file listing interface
+**Learning:** Found several dynamic components acting as buttons and list areas without sufficient `aria-label` and `aria-live` capabilities which make screen readers omit important dynamic updates and interactivity.
+**Action:** Always verify if complex HTML structures providing state visually also have appropriate aria attributes to communicate meaning to screen readers (e.g. `aria-live="polite"` on dynamically changing parts and `aria-label` for symbol-only `<button>`).
