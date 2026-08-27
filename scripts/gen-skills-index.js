@@ -46,13 +46,13 @@ function findSkills(packDir) {
   return results.sort();
 }
 
-let md = `# Agent Skills\n\n`;
-md += `Vendored agent-skill packs, installed into both \`.claude/skills/\` (Claude Code, Cursor) `;
-md += `and \`.agents/skills/\` (Codex, Prime Agent). Skills are discovered automatically by `;
-md += `compatible agents via the [Agent Skills standard](https://skills.sh).\n\n`;
-md += `> Slimmed install: only \`SKILL.md\` files and their Markdown references are vendored. `;
-md += `Refresh with \`./scripts/install-agent-skills.sh\` then \`node scripts/gen-skills-index.js\`. `;
-md += `All packs are MIT licensed; each pack directory keeps its upstream \`LICENSE\`.\n\n`;
+let md = '# Agent Skills\n\n';
+md += 'Vendored agent-skill packs, installed into both `.claude/skills/` (Claude Code, Cursor) ';
+md += 'and `.agents/skills/` (Codex, Prime Agent). Skills are discovered automatically by ';
+md += 'compatible agents via the [Agent Skills standard](https://skills.sh).\n\n';
+md += '> Slimmed install: only `SKILL.md` files and their Markdown references are vendored. ';
+md += 'Refresh with `./scripts/install-agent-skills.sh` then `node scripts/gen-skills-index.js`. ';
+md += 'All packs are MIT licensed; each pack directory keeps its upstream `LICENSE`.\n\n';
 
 let total = 0;
 for (const pack of Object.keys(PACK_META)) {
@@ -63,33 +63,33 @@ for (const pack of Object.keys(PACK_META)) {
   total += skills.length;
   md += `## ${meta.title}\n\n`;
   md += `Source: [\`${meta.source}\`](https://github.com/${meta.source}) · v${meta.version} · MIT · ${meta.note}\n\n`;
-  md += `| Skill | Description |\n| --- | --- |\n`;
+  md += '| Skill | Description |\n| --- | --- |\n';
   for (const s of skills) {
     const fm = readFrontmatter(s);
     const name = fm.name || path.basename(path.dirname(s));
     const desc = (fm.description || '').replace(/\|/g, '\\|');
     md += `| \`${name}\` | ${desc} |\n`;
   }
-  md += `\n`;
+  md += '\n';
 }
 
 md += `---\n\n**Total: ${total} skills across ${Object.keys(PACK_META).length} packs.**\n\n`;
 
-md += `## Recommended for this project\n\n`;
-md += `This project is a Node.js/Express web app (a security-hardened visual git\n`;
-md += `code-review tool). The following vendored skills map directly to its needs:\n\n`;
-md += `| Project need | Use these skills |\n| --- | --- |\n`;
-md += `| Security review (OWASP/STRIDE, injection, headers) | \`gstack/cso\`, \`pstack/thermo-nuclear-code-quality-review\`, \`gstack/review\` |\n`;
-md += `| Code review before merge | \`mattpocock/code-review\`, \`superpowers/requesting-code-review\`, \`superpowers/receiving-code-review\`, \`pstack/make-pr-easy-to-review\` |\n`;
-md += `| Testing (the repo uses Jest) | \`superpowers/test-driven-development\`, \`mattpocock/tdd\`, \`pstack/tdd\` |\n`;
-md += `| Debugging server/API issues | \`superpowers/systematic-debugging\`, \`mattpocock/diagnosing-bugs\`, \`gstack/investigate\` |\n`;
-md += `| Fixing CI / merge conflicts | \`pstack/fix-ci\`, \`pstack/fix-merge-conflicts\` |\n`;
-md += `| QA of the web UI | \`gstack/qa\`, \`gstack/qa-only\` |\n`;
-md += `| Planning & shipping features | \`superpowers/writing-plans\`, \`superpowers/executing-plans\`, \`gstack/ship\` |\n\n`;
-md += `### Complementary Cursor tooling (enable in the Cursor UI)\n\n`;
-md += `- **CodeRabbit** — deep automated code review (\`code-review\` skill / \`code-reviewer\` agent). Requires a \`CODERABBIT_API_KEY\` secret to run non-interactively in Cloud Agents.\n`;
-md += `- **Security Review** and **Bugbot** agents — on-demand security and bug review of local changes.\n`;
-md += `- These are Cursor plugins/agents, not filesystem skills, so they are enabled from Cursor rather than vendored here.\n`;
+md += '## Recommended for this project\n\n';
+md += 'This project is a Node.js/Express web app (a security-hardened visual git\n';
+md += 'code-review tool). The following vendored skills map directly to its needs:\n\n';
+md += '| Project need | Use these skills |\n| --- | --- |\n';
+md += '| Security review (OWASP/STRIDE, injection, headers) | `gstack/cso`, `pstack/thermo-nuclear-code-quality-review`, `gstack/review` |\n';
+md += '| Code review before merge | `mattpocock/code-review`, `superpowers/requesting-code-review`, `superpowers/receiving-code-review`, `pstack/make-pr-easy-to-review` |\n';
+md += '| Testing (the repo uses Jest) | `superpowers/test-driven-development`, `mattpocock/tdd`, `pstack/tdd` |\n';
+md += '| Debugging server/API issues | `superpowers/systematic-debugging`, `mattpocock/diagnosing-bugs`, `gstack/investigate` |\n';
+md += '| Fixing CI / merge conflicts | `pstack/fix-ci`, `pstack/fix-merge-conflicts` |\n';
+md += '| QA of the web UI | `gstack/qa`, `gstack/qa-only` |\n';
+md += '| Planning & shipping features | `superpowers/writing-plans`, `superpowers/executing-plans`, `gstack/ship` |\n\n';
+md += '### Complementary Cursor tooling (enable in the Cursor UI)\n\n';
+md += '- **CodeRabbit** — deep automated code review (`code-review` skill / `code-reviewer` agent). Requires a `CODERABBIT_API_KEY` secret to run non-interactively in Cloud Agents.\n';
+md += '- **Security Review** and **Bugbot** agents — on-demand security and bug review of local changes.\n';
+md += '- These are Cursor plugins/agents, not filesystem skills, so they are enabled from Cursor rather than vendored here.\n';
 
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, md);
