@@ -1,0 +1,17 @@
+{
+  "name": "AI Visual Code Review",
+  "install": "npm ci",
+  "terminals": [
+    {
+      "name": "server",
+      "command": "npm start",
+      "description": "Express web server for the AI Visual Code Review app, served at http://localhost:3002"
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3002
+    }
+  ]
+}
