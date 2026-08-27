@@ -7,10 +7,10 @@
 # (Claude Code, Cursor) and ~/.agents/skills (Codex, Prime Agent) globally,
 # not just from this repo's working tree.
 #
-# Idempotent and safe to run on every boot: it skips gracefully when the
-# repo skill directories are not present (e.g. before the skills PR is merged).
+# Idempotent and safe to run repeatedly: it skips gracefully when the repo
+# skill directories are not present (e.g. before the skills PR is merged).
 #
-# Called from `.cursor/environment.json` install after `npm ci`.
+# Called from `.cursor/environment.json` install (after `npm ci`).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -24,6 +24,11 @@ link_packs() {
   for pack in "$repo_dir"/*/; do
     [ -d "$pack" ] || continue
     name="$(basename "$pack")"
+    # If a real (non-symlink) directory/file already occupies the target,
+    # remove it first so ln does not create a nested link inside it.
+    if [ -e "$home_dir/$name" ] && [ ! -L "$home_dir/$name" ]; then
+      rm -rf "$home_dir/$name"
+    fi
     ln -sfn "${pack%/}" "$home_dir/$name"
     echo "link-agent-skills: linked $home_dir/$name -> ${pack%/}"
   done
