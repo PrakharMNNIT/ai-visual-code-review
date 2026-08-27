@@ -1140,12 +1140,10 @@
 
                 container.innerHTML = '';
 
-                // Create a DocumentFragment to batch DOM insertions
+                // Create a DocumentFragment to batch DOM insertions to prevent O(N) layout thrashing
                 const fragment = document.createDocumentFragment();
 
                 // Enhanced file processing with better icons and metadata
-                // ⚡ Bolt: Batch DOM insertions using a DocumentFragment to prevent O(N) layout thrashing
-                const fragment = document.createDocumentFragment();
                 data.files.forEach((file, index) => {
                     const fileId = file.replace(/[^a-zA-Z0-9]/g, '_');
                     const fileExt = file.substring(file.lastIndexOf('.')).toLowerCase();
@@ -1696,7 +1694,6 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
-                .replace(/'/g, '&#039;');
         }
 
         // Keyboard shortcuts
