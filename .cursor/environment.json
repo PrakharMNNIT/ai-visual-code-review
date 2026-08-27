@@ -1,6 +1,6 @@
 {
   "name": "AI Visual Code Review",
-  "install": "npm ci",
+  "install": "npm ci\nbash scripts/link-agent-skills.sh",
   "terminals": [
     {
       "name": "server",
