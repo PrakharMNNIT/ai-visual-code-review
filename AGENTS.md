@@ -33,3 +33,15 @@ Agent) and are discovered automatically by compatible agents.
 
 When a task matches a skill's trigger description, read that skill's `SKILL.md`
 and follow it.
+
+### Issue tracker
+
+GitHub Issues for `praxstack/ai-visual-code-review` via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default roles: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
