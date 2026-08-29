@@ -2,7 +2,7 @@
 
 Vendored agent-skill packs, installed into both `.claude/skills/` (Claude Code, Cursor) and `.agents/skills/` (Codex, Prime Agent). Skills are discovered automatically by compatible agents via the [Agent Skills standard](https://agentskills.io).
 
-> Slimmed install: `SKILL.md`, Markdown references, and each skill's `scripts/` directory. gstack also vendors pack `bin/` and `setup`. Cursor lists gstack slash skills from `.cursor/skills/<name>/` (see `scripts/link-agent-skills.sh`). Refresh with `./scripts/install-agent-skills.sh` then `node scripts/gen-skills-index.js`. Packs keep their upstream LICENSE when the clone has one. Why these packs, and which ones were skipped: [`docs/agent-skill-packs.md`](agent-skill-packs.md).
+> Slimmed install: `SKILL.md`, Markdown references, and each skill's `scripts/` directory. gstack also vendors pack `bin/` and `setup`. Cursor slash commands come from flattened `.cursor/skills/<name>/` links for **every** vendored pack (see `scripts/link-agent-skills.sh`). That index is discovery, not always-on personality. Refresh with `./scripts/install-agent-skills.sh` then `node scripts/gen-skills-index.js`. Packs keep their upstream LICENSE when the clone has one. Why these packs, and which ones were skipped: [`docs/agent-skill-packs.md`](agent-skill-packs.md).
 
 ## Superpowers
 
@@ -1057,9 +1057,62 @@ Source: [`supabase/agent-skills`](https://github.com/supabase/agent-skills) · v
 | `supabase-postgres-best-practices` | Postgres best practices maintained by Supabase, for Postgres running anywhere. Load this skill BEFORE writing or changing anything that lives in a Postgres database: creating or altering tables and columns (including choosing column types), schema design, migrations and declarative schema files, RLS policies and the tests that verify them, indexes, triggers, database functions, queues and scheduled jobs (pg_cron, pgmq), vector/semantic search (pgvector), and restoring dumps (pg_restore) or importing data. Also load it when diagnosing slow queries, high CPU, timeouts, EXPLAIN plans, connection exhaustion, locking, bloat, or rows visible to the wrong user or tenant. This is not just a performance guide — schema, migration, security, and SQL authoring tasks need these rules too, even for a one-column change or a single query. |
 | `supabase` | Use when doing ANY task involving Supabase. Triggers: Supabase products (Database, Auth, Edge Functions, Realtime, Storage, Vectors, Cron, Queues); client libraries and SSR integrations (supabase-js, @supabase/ssr) in Next.js, React, SvelteKit, Astro, Remix; auth issues (login, logout, sessions, JWT, cookies, getSession, getUser, getClaims, RLS); Supabase CLI or MCP server; schema changes, migrations, declarative schemas, security audits, Postgres extensions (pg_graphql, pg_cron, pg_vector); debugging and troubleshooting errors or unexpected behavior on Supabase projects (HTTP errors, Postgres errors, RLS surprises, permission denied, schema cache issues, timeouts, Edge Function crashes, Realtime drops, Storage failures) and reading or querying logs (Logs Explorer, ClickHouse). |
 
+## last30days
+
+Source: [`mvanhorn/last30days-skill`](https://github.com/mvanhorn/last30days-skill) · v3.21.1 · Recency radar. Treat hits as leads, not evidence. Discover on demand.
+
+| Skill | Description |
+| --- | --- |
+| `last30days` | Research what people actually say about any topic in the last 30 days. Pulls posts and engagement from Reddit, X, YouTube, TikTok, Hacker News, Polymarket, GitHub, and the web. Includes a doctor health check to diagnose broken or missing sources. |
+
+## agent-deep-research
+
+Source: [`24601/agent-deep-research`](https://github.com/24601/agent-deep-research) · v2.1.3 · One deep-research skill (not Weizhena or other forks). Needs uv + a Gemini key at runtime; do not commit keys.
+
+| Skill | Description |
+| --- | --- |
+| `deep-research` | Async deep research via Gemini Interactions API (no Gemini CLI dependency). RAG-ground queries on local files (--context), preview costs (--dry-run), structured JSON output, adaptive polling. Universal skill for 30+ AI agents including Claude Code, Amp, Codex, and Gemini CLI. |
+
+## Hallmark
+
+Source: [`nutlope/hallmark`](https://github.com/nutlope/hallmark) · v1.1.0 · UI taste / anti-slop gate. Discover on demand.
+
+| Skill | Description |
+| --- | --- |
+| `hallmark` | Anti-AI-slop design skill for greenfield pages, audits, redesigns, and design extraction from URLs or screenshots. Use when the user asks to build a new app or landing page, wants to redesign something, invokes Hallmark by name, or uses audit/redesign/study. |
+
+## Impeccable
+
+Source: [`pbakaus/impeccable`](https://github.com/pbakaus/impeccable) · v4.1.2 · Frontend craft skill (Apache-2.0). Vendored from the upstream Cursor skill tree.
+
+| Skill | Description |
+| --- | --- |
+| `impeccable` | Use when the user wants to design, redesign, shape, critique, audit, polish, clarify, distill, harden, optimize, adapt, animate, colorize, extract, or otherwise improve a frontend interface. Covers websites, landing pages, dashboards, product UI, app shells, components, forms, settings, onboarding, and empty states. Handles UX review, visual hierarchy, information architecture, cognitive load, accessibility, performance, responsive behavior, theming, anti-patterns, typography, fonts, spacing, layout, alignment, color, motion, micro-interactions, UX copy, error states, edge cases, i18n, and reusable design systems or tokens. Also use for bland designs that need to become bolder or more delightful, loud designs that should become quieter, live browser iteration on UI elements, or ambitious visual effects that should feel technically extraordinary. Not for backend-only or non-UI tasks. |
+
+## OpenSpec (project-local)
+
+Source: [`Fission-AI/OpenSpec`](https://github.com/Fission-AI/OpenSpec) · v1.11.0 · Default spec/change layer. Generated by openspec init; Spec Kit stays for heavyweight greenfield.
+
+| Skill | Description |
+| --- | --- |
+| `openspec-apply-change` | Implement tasks from an OpenSpec change. Use when the user wants to start implementing, continue implementation, or work through tasks. |
+| `openspec-archive-change` | Archive a completed change in the experimental workflow. Use when the user wants to finalize and archive a change after implementation is complete. |
+| `openspec-explore` | Enter explore mode - a thinking partner for exploring ideas, investigating problems, and clarifying requirements. Use when the user wants to think through something before or during a change. |
+| `openspec-propose` | Propose a new change with all artifacts generated in one step. Use when the user wants to quickly describe what they want to build and get a complete proposal with design, specs, and tasks ready for implementation. |
+| `openspec-sync-specs` | Sync delta specs from a change to main specs. Use when the user wants to update main specs with changes from a delta spec, without archiving the change. |
+| `openspec-update-change` | Update an OpenSpec change by revising its existing planning artifacts and keeping them coherent with one another. Use when the user wants to revise a change's plan, fold new decisions into it, or reconcile its artifacts after an edit. Never edits code. |
+
+## Graphify
+
+Source: [graphifyy (PyPI)](https://pypi.org/project/graphifyy/) · v0.9.51 · Optional knowledge graph. Command `graphify`. Indexing is not part of Cloud Agent boot.
+
+| Skill | Description |
+| --- | --- |
+| `graphify` | Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god nodes, community detection, and query/path/explain tools. |
+
 ---
 
-**Total: 920 skills across 19 packs.**
+**Total: 931 skills across 25 packs.**
 
 ## Recommended for this project
 
@@ -1079,11 +1132,15 @@ code-review tool). The following vendored skills map directly to its needs:
 | Planning and shipping | `superpowers/writing-plans`, `superpowers/executing-plans`, `gstack/ship`, `addyosmani/shipping-and-launch` |
 | UI craft | `anthropics/frontend-design`, `vercel-agent-skills/web-design-guidelines` |
 | GitHub issues / PRs | `awesome-copilot/github-issues`, `mattpocock/triage`, `microsoft/github-issue-creator` |
-| Spec-driven (pick one) | `spec-kit/*` **or** `gstack/spec` **or** Compound Engineering spec skills |
+| Spec / change (default) | OpenSpec (`openspec/` + `/opsx-*` commands). Spec Kit is heavyweight greenfield only. |
 | AWS / Cloudflare / Supabase | `aws/*`, `cloudflare/*`, `supabase/*` when that stack is in play |
+| Recency radar / deep research | `last30days/last30days` (leads, not evidence), `agent-deep-research` |
+| UI taste / design engineering | `hallmark/hallmark` (taste), `impeccable/impeccable` (design engineering) |
+| Knowledge graph (optional) | `graphify/graphify` once `graphify-out/graph.json` exists |
+| Library docs / this-repo intel | Context7 MCP / Serena MCP ([docs/agent-skill-packs.md](agent-skill-packs.md)) |
 | Compound after ship | `compound-engineering/ce-compound` (not on the same task as gstack, Superpowers, or pstack) |
 
-Pick **one** spec/implement methodology per task. Do not run gstack, Superpowers, pstack, and Compound Engineering together.
+Pick **one** execution engine per task: **pstack XOR Superpowers XOR gstack**. OpenSpec is the default WHAT/change layer; Spec Kit is heavyweight greenfield. Compound Engineering is the learn/compound layer after a run. Do not run those conductors together.
 
 ### Complementary Cursor tooling (enable in the Cursor UI)
 

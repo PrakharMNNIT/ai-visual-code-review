@@ -98,6 +98,11 @@ dist
 AI_REVIEW.md
 code-reviews-*/
 
+# Agent / native-stack local artifacts (never commit secrets or indexes)
+.serena/
+graphify-out/
+.graphify/
+
 # OS generated files
 .DS_Store
 .DS_Store?
@@ -116,3 +121,11 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# OpenSpec / Graphify / Serena generated data (do not commit indexes)
+graphify-out/
+.graphify/
+.serena/
+.cursor/mcp.local.json
+openspec/changes/
+openspec/specs/

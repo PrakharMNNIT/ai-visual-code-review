@@ -26,9 +26,15 @@ Code and Cursor.
 | `aws/` | [`aws/agent-toolkit-for-aws`](https://github.com/aws/agent-toolkit-for-aws) (`skills/` tree) | Apache-2.0 |
 | `cloudflare/` | [`cloudflare/skills`](https://github.com/cloudflare/skills) | Apache-2.0 |
 | `supabase/` | [`supabase/agent-skills`](https://github.com/supabase/agent-skills) | MIT |
+| `last30days/` | [`mvanhorn/last30days-skill`](https://github.com/mvanhorn/last30days-skill) | MIT |
+| `agent-deep-research/` | [`24601/agent-deep-research`](https://github.com/24601/agent-deep-research) | MIT |
+| `hallmark/` | [`nutlope/hallmark`](https://github.com/nutlope/hallmark) | MIT |
+| `impeccable/` | [`pbakaus/impeccable`](https://github.com/pbakaus/impeccable) | Apache-2.0 |
+| `openspec/` | OpenSpec init (project-local) | — |
+| `graphify/` | `uv tool install graphifyy` | — |
 
 - Full index: [`docs/agent-skills.md`](../../docs/agent-skills.md).
 - Why these packs: [`docs/agent-skill-packs.md`](../../docs/agent-skill-packs.md).
 - Slimmed install: `SKILL.md`, Markdown references, and each skill's `scripts/`.
 - Refresh: `./scripts/install-agent-skills.sh && node scripts/gen-skills-index.js`.
-- Pipeline: find-skills → spec (gstack **XOR** spec-kit **XOR** CE) → interrogate → implement (pstack **XOR** Superpowers) → review → ToB → agent-browser QA → ship → CE compound. Never run CE + gstack + Superpowers + pstack on the same task.
+- Pipeline: find-skills → WHAT (OpenSpec **XOR** Spec Kit) → interrogate → implement (pstack **XOR** Superpowers **XOR** gstack) → review → ToB → agent-browser QA → ship → CE compound. Never run CE + gstack + Superpowers + pstack on the same task.

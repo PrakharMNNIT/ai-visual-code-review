@@ -21,7 +21,13 @@ const PACKS = [
   'microsoft',
   'aws',
   'cloudflare',
-  'supabase'
+  'supabase',
+  'last30days',
+  'agent-deep-research',
+  'hallmark',
+  'impeccable',
+  'openspec',
+  'graphify'
 ];
 
 const MICROSOFT_SUBSET = [
@@ -108,7 +114,13 @@ describe('vendored agent skill packs', () => {
       'Microsoft skills',
       'AWS agent toolkit',
       'Cloudflare skills',
-      'Supabase agent skills'
+      'Supabase agent skills',
+      'last30days',
+      'agent-deep-research',
+      'Hallmark',
+      'Impeccable',
+      'OpenSpec (project-local)',
+      'Graphify'
     ]) {
       expect(index).toContain(pack);
     }
@@ -158,7 +170,7 @@ describe('spec-kit, microsoft subset, and stack packs', () => {
     const packs = fs.readFileSync(path.join(ROOT, 'docs/agent-skill-packs.md'), 'utf8');
     expect(packs).toContain('specify init --here --integration cursor-agent');
     expect(packs).toContain('git+https://github.com/github/spec-kit.git@v1.0.1');
-    expect(packs).toContain('find-skills → spec');
+    expect(packs).toContain('find-skills → WHAT');
   });
 
   test('microsoft is a documented subset, not the whole catalog', () => {
@@ -204,6 +216,10 @@ describe('skill pack policy and setup docs', () => {
     expect(installer).toContain('assert_github_slug');
     expect(installer).toContain('SPECKIT_TAG="v1.0.1"');
     expect(installer).toContain('awesome-copilot|github/awesome-copilot|skills|LICENSE||');
+    expect(installer).toContain('last30days|mvanhorn/last30days-skill|skills|LICENSE||');
+    expect(installer).toContain('agent-deep-research|24601/agent-deep-research|.|LICENSE||');
+    expect(installer).toContain('hallmark|nutlope/hallmark|skills|LICENSE||');
+    expect(installer).toContain('impeccable|pbakaus/impeccable|.cursor/skills|LICENSE||');
     expect(installer).not.toContain('AWESOME_GH_SKILLS=');
   });
 
@@ -215,7 +231,13 @@ describe('skill pack policy and setup docs', () => {
     expect(packs).toContain('supabase/agent-skills');
     expect(packs).toContain('.cursor/skills');
     expect(packs).toContain('/plan-ceo-review');
-    expect(packs).toContain('Never run Compound Engineering, gstack, Superpowers, and pstack');
+    expect(packs).toContain('/ce-brainstorm');
+    expect(packs).toContain('Never run gstack, Superpowers, pstack, Compound Engineering, and ECC');
+    expect(packs).toContain('OpenSpec is the default');
+    expect(packs).toContain('oraios/serena');
+    expect(packs).toContain('@upstash/context7-mcp');
+    expect(packs).toContain('graphifyy');
+    expect(packs).toContain('web-interface-guidelines');
   });
 
   test('matt pocock setup records GitHub issues, default labels, and single-context docs', () => {
@@ -234,6 +256,35 @@ describe('skill pack policy and setup docs', () => {
     const text = fs.readFileSync(file, 'utf8');
     expect(text).toContain('alwaysApply: true');
     expect(unknownPstackSlugs(text)).toEqual([]);
+  });
+
+  test('2026 layers: last30days caveat, web-guidelines pin, approved MCP only', () => {
+    const last30 = fs.readFileSync(path.join(ROOT, '.claude/skills/last30days/NOTICE.md'), 'utf8');
+    expect(last30).toMatch(/leads, not evidence/i);
+    const skill = fs.readFileSync(
+      path.join(ROOT, '.claude/skills/vercel-agent-skills/web-design-guidelines/SKILL.md'),
+      'utf8'
+    );
+    expect(skill).toContain('e3d624baaf29dc1fc645aff3e38f03e564d2d6b1');
+    expect(skill).not.toContain('Fetch fresh guidelines before each review');
+    expect(fs.existsSync(path.join(
+      ROOT,
+      '.claude/skills/vercel-agent-skills/web-design-guidelines/references/web-interface-guidelines.md'
+    ))).toBe(true);
+    const mcp = JSON.parse(fs.readFileSync(path.join(ROOT, '.cursor/mcp.json'), 'utf8'));
+    expect(Object.keys(mcp.mcpServers).sort()).toEqual(['context7', 'serena']);
+    expect(mcp.mcpServers.context7.args).toContain('@upstash/context7-mcp');
+    expect(JSON.stringify(mcp)).not.toMatch(/CONTEXT7_API_KEY|sk-[A-Za-z0-9]/);
+    expect(fs.existsSync(path.join(ROOT, 'docs/mcp.md'))).toBe(true);
+    expect(fs.existsSync(path.join(ROOT, 'docs/openspec.md'))).toBe(true);
+    expect(fs.existsSync(path.join(ROOT, 'docs/graphify.md'))).toBe(true);
+    expect(fs.existsSync(path.join(ROOT, 'openspec/config.yaml'))).toBe(true);
+    const env = fs.readFileSync(path.join(ROOT, '.cursor/environment.json'), 'utf8');
+    expect(env).toContain('install-cursor-native-stack.sh');
+    const packs = fs.readFileSync(path.join(ROOT, 'docs/agent-skill-packs.md'), 'utf8');
+    expect(packs).toContain('wshobson/agents');
+    expect(packs).toContain('everything-claude-code');
+    expect(packs).toContain('resolve-codex-generation-model.ts');
   });
 });
 

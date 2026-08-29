@@ -17,15 +17,26 @@ when installing into a live harness. This repo vendors into
 ## Pipeline (pick one methodology per stage)
 
 ```
-find-skills → spec (gstack XOR Spec Kit XOR CE) → interrogate (mattpocock + improve)
-  → implement (pstack XOR Superpowers) → review → ToB security → agent-browser QA → ship → ce-compound
+find-skills → WHAT (OpenSpec XOR Spec Kit) → interrogate (mattpocock + improve)
+  → implement (pstack XOR Superpowers XOR gstack) → review → ToB security
+  → agent-browser QA → ship → ce-compound
 ```
 
-Never run Compound Engineering, gstack, Superpowers, and pstack on the
-same task. CE is the learn/compound layer after a run, not a fourth
-parallel methodology. Spec, implement, and compound each pick **one**
-source: gstack XOR Spec Kit XOR CE for spec; pstack XOR Superpowers for
-implement.
+Never run gstack, Superpowers, pstack, Compound Engineering, and ECC as
+four/five conductors on the same task.
+
+- **WHAT / change layer:** OpenSpec is the default (`openspec/` plus Cursor
+  `/opsx-*` commands). Spec Kit stays vendored for **heavyweight greenfield**
+  only. Do not `specify init` this Express app.
+- **Execution engine:** pick **one** — pstack (Cursor-native) XOR Superpowers
+  XOR gstack.
+- **After the run:** Compound Engineering (`ce-compound`) is the
+  learn/compound layer, not a parallel conductor.
+
+Cursor slash commands come from flattened `.cursor/skills/<name>/` links for
+**every** vendored pack. That catalog is discovery, not always-on personality.
+Do not dump hundreds of skills into `alwaysApply` rules. Trail of Bits,
+Microsoft, AWS, Cloudflare, and Awesome Copilot stay on-demand.
 
 ## Why these packs
 
@@ -55,10 +66,16 @@ not a substitute for that bar.
 | AWS | [aws/agent-toolkit-for-aws](https://github.com/aws/agent-toolkit-for-aws) | `skills/` core + specialized (Apache-2.0). Layout confirmed: `skills/core-skills` and `skills/specialized-skills`. |
 | Cloudflare | [cloudflare/skills](https://github.com/cloudflare/skills) | Workers, Wrangler, Durable Objects, and related (Apache-2.0). |
 | Supabase | [supabase/agent-skills](https://github.com/supabase/agent-skills) | Backend, Postgres, RLS (MIT). |
+| last30days | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) | Recency radar. **Leads, not evidence.** Verify independently. |
+| agent-deep-research | [24601/agent-deep-research](https://github.com/24601/agent-deep-research) | One deep-research pack only. |
+| Hallmark | [nutlope/hallmark](https://github.com/nutlope/hallmark) | Taste / anti-slop gate. |
+| Impeccable | [pbakaus/impeccable](https://github.com/pbakaus/impeccable) | Design engineering. Complementary to Hallmark. |
+| OpenSpec | [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) | Default spec/change layer (`openspec init`). Not a `PACKS` clone. |
+| Graphify | [graphifyy on PyPI](https://pypi.org/project/graphifyy/) | Optional knowledge graph. Indexing is not on boot. |
 
 pstack was previously vendored from [michael-denyer/pstack-claude](https://github.com/michael-denyer/pstack-claude), a Claude Code and Codex port of the same skills. That port remains useful on those harnesses. This repo's agents run in Cursor, so the installer clones `cursor/plugins` and copies `pstack/skills`.
 
-Cursor pstack model overrides live at [`.cursor/rules/pstack-models.mdc`](../.cursor/rules/pstack-models.mdc) (`alwaysApply: true`). `scripts/link-agent-skills.sh` copies that file to `~/.cursor/rules/` on Cloud Agent boot, and flattens each gstack skill into [`.cursor/skills/`](../.cursor/skills/) plus `~/.cursor/skills/` so Cursor's one-level index lists `/plan-ceo-review` the same way plugin skills like `/setup-pstack` appear.
+Cursor pstack model overrides live at [`.cursor/rules/pstack-models.mdc`](../.cursor/rules/pstack-models.mdc) (`alwaysApply: true`). `scripts/link-agent-skills.sh` copies that file to `~/.cursor/rules/` on Cloud Agent boot, and flattens **every** vendored pack into [`.cursor/skills/`](../.cursor/skills/) plus `~/.cursor/skills/` so Cursor's one-level index lists `/plan-ceo-review`, `/ce-brainstorm`, `/improve`, and the rest the same way plugin skills like `/setup-pstack` appear. Name collisions are prefixed (`<pack>-<name>`) and logged in [`docs/cursor-skill-collisions.md`](cursor-skill-collisions.md). Nested `SKILL.md` files under `references/`, `reference/`, or `scripts/` are not flattened (those are docs, not slash skills).
 
 ## Spec Kit
 
@@ -93,15 +110,101 @@ specify init --here --integration cursor-agent
 ```
 
 gstack does **not** ship a Cursor plugin manifest (no `.cursor-plugin`). Native
-`./setup --host cursor` is accepted by the installer even when `--help` omits
-`cursor` ([issue 2361](https://github.com/garrytan/gstack/issues/2361) is
-closed; the help text can still lag). That path requires bun and generates
-host-specific docs under `~/.cursor/skills/gstack-*`. This repo does not run
-it on boot. Instead `scripts/link-agent-skills.sh` flattens the vendored pack
-into `.cursor/skills/<name>` (project-local relative symlinks) and
-`~/.cursor/skills/<name>` using each skill's `name:` field. The slim vendor
-includes gstack `bin/` and `setup` so `gstack-skill-start` exists at
-`~/.claude/skills/gstack/bin/` (the preamble path in SKILL.md).
+`./setup --host cursor` **accepts** the host ([issue 2361](https://github.com/garrytan/gstack/issues/2361)
+is closed; help text can still lag). On this Cloud VM (bun 1.4.0) the slim
+vendor **fails**:
+
+```
+error: Module not found "scripts/resolve-codex-generation-model.ts"
+```
+
+That helper is not in the slim copy. Do not block on native setup. This repo
+does not run gstack setup on Cloud Agent boot. `scripts/link-agent-skills.sh`
+flattens **every** vendored pack into `.cursor/skills/<name>` (project-local
+relative symlinks) and `~/.cursor/skills/<name>` using each skill's `name:`
+field. The slim vendor includes gstack `bin/` and `setup` so
+`gstack-skill-start` exists at `~/.claude/skills/gstack/bin/`.
+
+To try native gstack Cursor install from a **full** clone (not the slim vendor):
+
+```
+git clone --depth 1 https://github.com/garrytan/gstack.git /tmp/gstack-full
+/tmp/gstack-full/setup --host cursor
+```
+
+Then re-run `bash scripts/link-agent-skills.sh` so the project flatten remains
+canonical. If bun is missing, the flatten is the supported Cursor path.
+
+## OpenSpec vs Spec Kit
+
+OpenSpec is the **default** spec/change layer (`openspec/` plus Cursor
+`/opsx-*` commands). See [`docs/openspec.md`](openspec.md). Spec Kit command
+templates remain vendored for **heavyweight greenfield**. This Express app
+does **not** run `specify init`.
+
+## MCP governance (Serena + Context7 only)
+
+Only these two MCP servers are in-repo. Do not add random
+`@modelcontextprotocol/server-*` servers.
+
+Project config: [`.cursor/mcp.json`](../.cursor/mcp.json).
+`scripts/link-agent-skills.sh` copies it to `~/.cursor/mcp.json` **only when
+the home file is missing** (never clobber a user-owned MCP config).
+
+```json
+{
+  "mcpServers": {
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "ide-assistant",
+        "--project",
+        "${workspaceFolder}"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+  }
+}
+```
+
+No API keys are committed. Context7 works without a key; a
+`CONTEXT7_API_KEY` in the environment is optional. Serena indexes into
+`.serena/` (gitignored). Index with:
+
+```
+uvx --from git+https://github.com/oraios/serena serena project index
+```
+
+## Graphify
+
+Package name is `graphifyy` (two y's); the command is `graphify`.
+
+```
+uv tool install graphifyy
+graphify cursor install
+graphify install --project
+```
+
+`graphify cursor install` writes `.cursor/rules/graphify.mdc` (a **small**
+always-apply pointer, not a 900-skill dump). Generated graph data
+(`graphify-out/`, `.graphify/`) is gitignored. Do not commit an index.
+
+## Vercel web-design-guidelines pin
+
+The `web-design-guidelines` skill in vercel-agent-skills must **not** fetch
+mutable `main` at runtime (supply-chain / drift). The installer clones
+`vercel-labs/web-interface-guidelines` and pins `command.md` to
+`vercel-agent-skills/web-design-guidelines/references/web-interface-guidelines.md`,
+then rewrites the skill's How It Works section to read that file. Re-run
+`scripts/install-agent-skills.sh` to refresh the pin.
 
 ## Microsoft subset
 
@@ -162,6 +265,11 @@ These passed the credibility bar and failed the "this repo needs the files" bar.
 | [agentskills/agentskills](https://github.com/agentskills/agentskills) | The open standard, not a skill pack. |
 | [anthropics/skills](https://github.com/anthropics/skills) (remainder) | pptx/xlsx/docx, art, branding, gifs stay upstream. |
 | [microsoft/skills](https://github.com/microsoft/skills) (remainder) | Azure SDK / Foundry / Kusto / M365 dumps. Context rot. |
+| [wshobson/agents](https://github.com/wshobson/agents) | 94 plugins. Too large; bookmark only. |
+| [affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code) | Full ECC. Not a fifth conductor. Bookmark only. |
+| NVIDIA / Remotion / Hyperframes / Manim skill packs | This Express git-review app does not need them. Bookmark only. |
+| Google Stitch | Needs Google auth this environment does not have. Skip. |
+| Other deep-research forks (Weizhena and friends) | One pack only: `24601/agent-deep-research`. |
 
 Awesome-list scrapes and 50k-skill indexes are discovery surfaces. They are not packs. Use `find-skills` instead of `npx skills add ... --all`.
 
@@ -194,6 +302,13 @@ Do not run `npx skills add ... --all`. Cloud Agents need the files in git.
 - [aws/agent-toolkit-for-aws](https://github.com/aws/agent-toolkit-for-aws) (Apache-2.0)
 - [cloudflare/skills](https://github.com/cloudflare/skills) (Apache-2.0)
 - [supabase/agent-skills](https://github.com/supabase/agent-skills) (MIT)
+- [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) (MIT)
+- [24601/agent-deep-research](https://github.com/24601/agent-deep-research) (MIT)
+- [nutlope/hallmark](https://github.com/nutlope/hallmark) (MIT)
+- [pbakaus/impeccable](https://github.com/pbakaus/impeccable) (Apache-2.0)
+- [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec)
+- [oraios/serena](https://github.com/oraios/serena)
+- [Upstash Context7 MCP](https://github.com/upstash/context7)
 - [Agent Skills spec](https://agentskills.io)
 - [Cursor skills docs](https://cursor.com/docs/skills)
 - [michael-denyer/pstack-claude](https://github.com/michael-denyer/pstack-claude) (Claude Code port of official pstack)
