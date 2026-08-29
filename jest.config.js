@@ -15,7 +15,14 @@ module.exports = {
   // Ignore patterns
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/vscode-extension/'
+    '/vscode-extension/',
+    '/.claude/',
+    '/.agents/'
+  ],
+
+  modulePathIgnorePatterns: [
+    '/.claude/',
+    '/.agents/'
   ],
 
   // Coverage configuration
@@ -24,6 +31,8 @@ module.exports = {
     '!**/node_modules/**',
     '!**/test/**',
     '!**/vscode-extension/**',
+    '!**/.claude/**',
+    '!**/.agents/**',
     '!**/coverage/**',
     '!jest.config.js',
     '!.eslintrc.js'

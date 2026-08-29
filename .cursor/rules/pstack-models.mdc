@@ -1,0 +1,31 @@
+---
+description: pstack per-role model choices (overrides skill defaults)
+alwaysApply: true
+---
+# pstack model configuration. One line per role. Delete a line to fall back to the skill default.
+# `inherit-parent` or `auto` as a value: the role runs on the parent chat model (omit Task `model`). Alias entries in a panel list still count toward its fan-out.
+# Slugs are Cursor Task models confirmed in this workspace. Skill-example names that are not in the Task list map as:
+#   grok-4.6-fast-xhigh → cursor-grok-4.6-high-fast
+#   gpt-5.6-sol-max → gpt-5.6-sol-xhigh
+#   claude-fable-5-thinking-max → claude-fable-5-thinking-xhigh
+#   claude-opus-5-thinking-xhigh → claude-opus-5-thinking-high
+# 4-model panel (cross-family): claude-opus-5-thinking-high, claude-fable-5-thinking-high, cursor-grok-4.6-high-fast, gpt-5.6-sol-high
+# Strongest judgment / hardest tasks: claude-fable-5-thinking-xhigh
+feature, refactoring: cursor-grok-4.6-high-fast
+bug-fix: gpt-5.6-sol-xhigh
+perf-issue: gpt-5.6-sol-xhigh
+hillclimb: gpt-5.6-sol-xhigh
+judgment and prose: claude-fable-5-thinking-xhigh
+hardest tasks: claude-fable-5-thinking-xhigh
+how explorer: cursor-grok-4.6-high-fast
+how explainer: claude-fable-5-thinking-xhigh
+how critics: claude-opus-5-thinking-high, claude-fable-5-thinking-high, cursor-grok-4.6-high-fast, gpt-5.6-sol-high
+why investigators: cursor-grok-4.6-high-fast
+why synthesizer: claude-fable-5-thinking-xhigh
+reflect tooling: gpt-5.6-sol-xhigh
+reflect judgment, divergent, synthesizer: claude-fable-5-thinking-xhigh
+arena runners: claude-opus-5-thinking-high, claude-fable-5-thinking-high, cursor-grok-4.6-high-fast, gpt-5.6-sol-high
+arena cross-judge pool: claude-opus-5-thinking-high, claude-fable-5-thinking-high, cursor-grok-4.6-high-fast, gpt-5.6-sol-high
+swarm workers: cursor-grok-4.6-high-fast
+architect runners: claude-opus-5-thinking-high, claude-fable-5-thinking-high, cursor-grok-4.6-high-fast, gpt-5.6-sol-high
+interrogate reviewers: claude-opus-5-thinking-high, claude-fable-5-thinking-high, cursor-grok-4.6-high-fast, gpt-5.6-sol-high
