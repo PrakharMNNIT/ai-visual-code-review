@@ -11,7 +11,7 @@
 set -u
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-export PATH="${HOME:-/home/ubuntu}/.local/bin:${PATH}"
+export PATH="${HOME:-/home/ubuntu}/.bun/bin:${HOME:-/home/ubuntu}/.local/bin:${PATH}"
 mkdir -p "${HOME:-/home/ubuntu}/.local/bin"
 
 try() {

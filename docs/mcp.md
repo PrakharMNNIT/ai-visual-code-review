@@ -43,8 +43,17 @@ Semantic code intelligence for **this** tree. Optional index (not on boot):
 uvx --from git+https://github.com/oraios/serena serena project index
 ```
 
-Index artifacts belong under `.serena/` (gitignored). If Cursor does not
-expand `${workspaceFolder}`, pass an absolute project path locally.
+Index artifacts belong under `.serena/` (gitignored). Non-interactive create
++ index for this Express app (Serena has no `javascript` language id; use
+`typescript`):
+
+```
+uvx --from git+https://github.com/oraios/serena serena project create \
+  --name ai-visual-code-review --language typescript --index
+```
+
+If Cursor does not expand `${workspaceFolder}`, pass an absolute project path
+locally.
 
 ## Graphify vs Serena
 

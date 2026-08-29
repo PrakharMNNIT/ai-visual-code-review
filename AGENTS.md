@@ -35,10 +35,13 @@ simultaneous always-on conductors.
 | Implement | **pstack** (native Cursor) · Superpowers · gstack implement |
 | Learn after a run | Compound Engineering (`ce-compound`) |
 
-pstack is native Cursor execution. gstack `./setup --host cursor` is accepted
-but this slim vendor fails on a missing `scripts/resolve-codex-generation-model.ts`
-— flatten remains the Cursor discovery path. Superpowers is disciplined
-engineering. CE is organizational learning, not a fourth parallel methodology.
+pstack is native Cursor execution. gstack `./setup --host cursor` works from a
+**full** clone (this VM: bun 1.4.0; help omits `cursor` but the parser
+accepts it). The slim vendored tree lacks
+`scripts/resolve-codex-generation-model.ts`, so do not run `./setup` from
+`.claude/skills/gstack`. Flatten remains the project Cursor discovery path.
+Superpowers is disciplined engineering. CE is organizational learning, not a
+fourth parallel methodology.
 
 ### 2026 high-signal layers
 

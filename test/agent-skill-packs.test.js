@@ -274,6 +274,7 @@ describe('skill pack policy and setup docs', () => {
     const mcp = JSON.parse(fs.readFileSync(path.join(ROOT, '.cursor/mcp.json'), 'utf8'));
     expect(Object.keys(mcp.mcpServers).sort()).toEqual(['context7', 'serena']);
     expect(mcp.mcpServers.context7.args).toContain('@upstash/context7-mcp');
+    expect(mcp.mcpServers.serena.args).toContain('ide-assistant');
     expect(JSON.stringify(mcp)).not.toMatch(/CONTEXT7_API_KEY|sk-[A-Za-z0-9]/);
     expect(fs.existsSync(path.join(ROOT, 'docs/mcp.md'))).toBe(true);
     expect(fs.existsSync(path.join(ROOT, 'docs/openspec.md'))).toBe(true);

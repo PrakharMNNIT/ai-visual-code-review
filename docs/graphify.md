@@ -8,22 +8,16 @@ graphify cursor install    # writes .cursor/rules/graphify.mdc
 graphify agents install    # optional skill into ~/.agents/skills/graphify
 ```
 
-This repo vendors the skill at `.claude/skills/graphify/graphify/` and
-`.agents/skills/graphify/graphify/` (copied from the official agents
-install). Flatten exposes `/graphify` via `.cursor/skills/graphify`.
+This repo vendors the skill at `.claude/skills/graphify/SKILL.md` and
+`.agents/skills/graphify/SKILL.md` (from `graphify install --project`).
+Flatten exposes `/graphify` via `.cursor/skills/graphify`.
 
 ## Indexing
 
-Cloud Agent **boot does not index**. On this repo `graphify .` treats hundreds of
-vendored `SKILL.md` files as docs and **requires an LLM API key**. Do not commit
-keys. A no-key attempt:
-
-```
-graphify . --code-only --no-viz
-```
-
-still walks the skill vendor (slow, noisy). Prefer indexing application source
-only (`public/`, `services/`, `server.js`) after flatten is idle — never run
+Cloud Agent **boot does not index**. `graphify update . --no-cluster` can
+run without an LLM key (AST only) but it walks the vendored skill trees and
+writes a large `graphify-out/` (gitignored). Prefer indexing application
+source (`public/`, `services/`, `server.js`) when you need a graph. Never run
 Graphify concurrently with `scripts/link-agent-skills.sh` (that script prunes
 and rewrites `.cursor/skills`).
 
@@ -34,9 +28,6 @@ when `graphify-out/graph.json` is missing.
 graphify query "<question>"
 graphify update .
 ```
-
-`graphify-out/` is gitignored. The Cursor rule skips mandatory graph queries
-when `graphify-out/graph.json` is missing.
 
 ## Graphify vs Serena
 

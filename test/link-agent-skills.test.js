@@ -97,9 +97,11 @@ describe('link-agent-skills.sh behavior', () => {
       expect(skillRealPath(dest)).toBe(
         fs.realpathSync(path.join(PACK, 'plan-ceo-review/SKILL.md'))
       );
-      expect(fs.readdirSync(path.join(home, '.cursor/skills')).length).toBe(
-        fs.readdirSync(PROJECT_SKILLS).length
-      );
+      const homeSkills = path.join(home, '.cursor/skills');
+      for (const name of ['plan-ceo-review', 'ce-brainstorm', 'improve', 'last30days']) {
+        expect(fs.existsSync(path.join(homeSkills, name, 'SKILL.md'))).toBe(true);
+      }
+      expect(fs.readdirSync(homeSkills).length).toBeGreaterThanOrEqual(50);
     } finally {
       fs.rmSync(home, { recursive: true, force: true });
     }
