@@ -30,7 +30,7 @@ const PACK_META = {
     title: 'gstack (Garry Tan)',
     source: 'garrytan/gstack',
     version: '1.72.0.0',
-    note: 'Role-based virtual engineering team skills (slimmed: Markdown plus skill scripts).'
+    note: 'Role-based virtual engineering team skills (Markdown, skill scripts, pack bin/setup). Cursor slash commands are flattened into `.cursor/skills/`.'
   },
   pstack: {
     title: 'pstack (Lauren Tan / poteto)',
@@ -171,6 +171,8 @@ md += 'Vendored agent-skill packs, installed into both `.claude/skills/` (Claude
 md += 'and `.agents/skills/` (Codex, Prime Agent). Skills are discovered automatically by ';
 md += 'compatible agents via the [Agent Skills standard](https://agentskills.io).\n\n';
 md += '> Slimmed install: `SKILL.md`, Markdown references, and each skill\'s `scripts/` directory. ';
+md += 'gstack also vendors pack `bin/` and `setup`. Cursor lists gstack slash skills from ';
+md += '`.cursor/skills/<name>/` (see `scripts/link-agent-skills.sh`). ';
 md += 'Refresh with `./scripts/install-agent-skills.sh` then `node scripts/gen-skills-index.js`. ';
 md += 'Packs keep their upstream LICENSE when the clone has one. Why these packs, and which ';
 md += 'ones were skipped: [`docs/agent-skill-packs.md`](agent-skill-packs.md).\n\n';

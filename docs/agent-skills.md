@@ -2,7 +2,7 @@
 
 Vendored agent-skill packs, installed into both `.claude/skills/` (Claude Code, Cursor) and `.agents/skills/` (Codex, Prime Agent). Skills are discovered automatically by compatible agents via the [Agent Skills standard](https://agentskills.io).
 
-> Slimmed install: `SKILL.md`, Markdown references, and each skill's `scripts/` directory. Refresh with `./scripts/install-agent-skills.sh` then `node scripts/gen-skills-index.js`. Packs keep their upstream LICENSE when the clone has one. Why these packs, and which ones were skipped: [`docs/agent-skill-packs.md`](agent-skill-packs.md).
+> Slimmed install: `SKILL.md`, Markdown references, and each skill's `scripts/` directory. gstack also vendors pack `bin/` and `setup`. Cursor lists gstack slash skills from `.cursor/skills/<name>/` (see `scripts/link-agent-skills.sh`). Refresh with `./scripts/install-agent-skills.sh` then `node scripts/gen-skills-index.js`. Packs keep their upstream LICENSE when the clone has one. Why these packs, and which ones were skipped: [`docs/agent-skill-packs.md`](agent-skill-packs.md).
 
 ## Superpowers
 
@@ -71,7 +71,7 @@ Source: [`mattpocock/skills`](https://github.com/mattpocock/skills) · v1.2.3 ·
 
 ## gstack (Garry Tan)
 
-Source: [`garrytan/gstack`](https://github.com/garrytan/gstack) · v1.72.0.0 · Role-based virtual engineering team skills (slimmed: Markdown plus skill scripts).
+Source: [`garrytan/gstack`](https://github.com/garrytan/gstack) · v1.72.0.0 · Role-based virtual engineering team skills (Markdown, skill scripts, pack bin/setup). Cursor slash commands are flattened into `.cursor/skills/`.
 
 | Skill | Description |
 | --- | --- |

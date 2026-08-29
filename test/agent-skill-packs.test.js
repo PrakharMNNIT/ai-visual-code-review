@@ -200,6 +200,7 @@ describe('spec-kit, microsoft subset, and stack packs', () => {
 describe('skill pack policy and setup docs', () => {
   test('installer validates GitHub slugs and pins spec-kit v1.0.1', () => {
     const installer = fs.readFileSync(path.join(ROOT, 'scripts/install-agent-skills.sh'), 'utf8');
+    expect(installer).toContain('copy_gstack_runtime');
     expect(installer).toContain('assert_github_slug');
     expect(installer).toContain('SPECKIT_TAG="v1.0.1"');
     expect(installer).toContain('awesome-copilot|github/awesome-copilot|skills|LICENSE||');
@@ -212,6 +213,8 @@ describe('skill pack policy and setup docs', () => {
     expect(packs).toContain('aws/agent-toolkit-for-aws');
     expect(packs).toContain('cloudflare/skills');
     expect(packs).toContain('supabase/agent-skills');
+    expect(packs).toContain('.cursor/skills');
+    expect(packs).toContain('/plan-ceo-review');
     expect(packs).toContain('Never run Compound Engineering, gstack, Superpowers, and pstack');
   });
 

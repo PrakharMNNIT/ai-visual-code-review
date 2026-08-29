@@ -6,9 +6,10 @@
 # .claude/skills/ (Claude Code, Cursor) and .agents/skills/ (Codex, Prime Agent).
 #
 # Slimmed install: SKILL.md, Markdown references, LICENSE/NOTICE files, and each
-# skill's scripts/ and references/ directories. Upstream tests, binaries, zips,
-# and plugin machinery stay out. Each pack keeps its upstream LICENSE when one
-# exists.
+# skill's scripts/ and references/ directories. Upstream tests, zips, and plugin
+# machinery stay out. gstack also copies pack-level `bin/` and `setup` so the
+# skill preamble's `gstack-skill-start` is runnable (still skip tests/zips).
+# Each pack keeps its upstream LICENSE when one exists.
 #
 # PACKS fields: name|github_repo|subdir|license_rel|allowlist|ref
 #   allowlist: empty = every SKILL.md under subdir; otherwise comma-separated
@@ -151,6 +152,16 @@ EOF
 Trail of Bits skills are CC-BY-SA-4.0. Discover a skill when the task needs it. Do not always-apply every security skill in this tree.
 EOF
       ;;
+    gstack)
+      cat > "$dest/NOTICE.md" <<'EOF'
+gstack skills are nested under this pack for Claude Code / Codex. Cursor slash
+commands index one-level skill directories (`.cursor/skills/<name>/SKILL.md`).
+`scripts/link-agent-skills.sh` flattens each skill into `.cursor/skills/` and
+`~/.cursor/skills/` using the SKILL.md `name:` field (e.g. `/plan-ceo-review`).
+Do not always-apply the whole suite. Native `./setup --host cursor` requires bun
+and is optional; this repo does not run it on boot.
+EOF
+      ;;
     compound-engineering)
       cat > "$dest/NOTICE.md" <<'EOF'
 Compound Engineering is the learn/compound layer. Do not run CE together with gstack, Superpowers, and pstack on the same task. Pick one spec/implement methodology per run.
@@ -210,6 +221,28 @@ Supabase agent skills (backend, Postgres, RLS). MIT. Discover on demand.
 EOF
       ;;
   esac
+}
+
+copy_gstack_runtime() {
+  local src="$1" dest="$2"
+  if [ -d "$src/bin" ]; then
+    mkdir -p "$dest/bin"
+    (cd "$src/bin" && find . -type f \
+      -not -name '*.zip' \
+      -not -path '*/test/*' \
+      -not -path '*/tests/*' \
+      | while read -r f; do
+          mkdir -p "$dest/bin/$(dirname "$f")"
+          cp "$src/bin/$f" "$dest/bin/$f"
+        done)
+    find "$dest/bin" -type f ! -name '*.md' ! -name '*.ts' -exec chmod +x {} +
+  fi
+  if [ -f "$src/setup" ]; then
+    cp "$src/setup" "$dest/setup"
+    chmod +x "$dest/setup"
+  fi
+  [ -f "$src/ETHOS.md" ] && cp "$src/ETHOS.md" "$dest/ETHOS.md"
+  [ -f "$src/VERSION" ] && cp "$src/VERSION" "$dest/VERSION"
 }
 
 copy_pack_license() {
@@ -325,6 +358,10 @@ extract_pack() {
     copy_pack_license "$src" "$dest" "$license_rel"
     write_pack_notice "$pack" "$dest"
 
+    if [ "$pack" = "gstack" ]; then
+      copy_gstack_runtime "$src" "$dest"
+    fi
+
     if [ "$pack" = "addyosmani" ] && [ -d "$src/references" ]; then
       mkdir -p "$dest/references"
       find "$src/references" -type f -name '*.md' | while read -r f; do
@@ -341,4 +378,6 @@ for entry in "${PACKS[@]}"; do
   extract_pack "$pack" "$repo" "$subdir" "$license_rel" "$allow" "$ref"
 done
 
+echo "Flattening gstack skills for Cursor discovery..."
+bash "$REPO_ROOT/scripts/link-agent-skills.sh"
 echo "Done. Regenerate the index with: node scripts/gen-skills-index.js"

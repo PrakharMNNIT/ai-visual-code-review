@@ -38,7 +38,7 @@ not a substitute for that bar.
 | --- | --- | --- |
 | Superpowers | [obra/superpowers](https://github.com/obra/superpowers) | SDLC methodology. Brainstorm, plan, TDD, review, worktrees. |
 | Matt Pocock | [mattpocock/skills](https://github.com/mattpocock/skills) | Engineering skills: grill, domain model, code review, TDD. |
-| gstack | [garrytan/gstack](https://github.com/garrytan/gstack) | Role-based CEO, design, eng, DX, QA, ship. Pick this **or** Spec Kit **or** CE for spec, not all three. Prefer Claude/Codex until `./setup --host cursor` matches the README ([issue 2361](https://github.com/garrytan/gstack/issues/2361)). |
+| gstack | [garrytan/gstack](https://github.com/garrytan/gstack) | Role-based CEO, design, eng, DX, QA, ship. Pick this **or** Spec Kit **or** CE for spec, not all three. Cursor slash commands (`/plan-ceo-review`) come from flattened `.cursor/skills/<name>/` links, not the nested pack directory. |
 | pstack | [cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack) | Official Cursor pstack. This workspace runs on Cursor, so this tree is the source, not the Claude Code port. |
 | improve | [shadcn/improve](https://github.com/shadcn/improve) | Expensive-model audit that writes plans for cheaper executors. |
 | Cursor Team Kit | [cursor/plugins cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit) | Cursor's own CI, review, ship, and verify skills. |
@@ -58,7 +58,7 @@ not a substitute for that bar.
 
 pstack was previously vendored from [michael-denyer/pstack-claude](https://github.com/michael-denyer/pstack-claude), a Claude Code and Codex port of the same skills. That port remains useful on those harnesses. This repo's agents run in Cursor, so the installer clones `cursor/plugins` and copies `pstack/skills`.
 
-Cursor pstack model overrides live at [`.cursor/rules/pstack-models.mdc`](../.cursor/rules/pstack-models.mdc) (`alwaysApply: true`). `scripts/link-agent-skills.sh` copies that file to `~/.cursor/rules/` on Cloud Agent boot.
+Cursor pstack model overrides live at [`.cursor/rules/pstack-models.mdc`](../.cursor/rules/pstack-models.mdc) (`alwaysApply: true`). `scripts/link-agent-skills.sh` copies that file to `~/.cursor/rules/` on Cloud Agent boot, and flattens each gstack skill into [`.cursor/skills/`](../.cursor/skills/) plus `~/.cursor/skills/` so Cursor's one-level index lists `/plan-ceo-review` the same way plugin skills like `/setup-pstack` appear.
 
 ## Spec Kit
 
@@ -92,9 +92,16 @@ For a **greenfield** repo that should be a Spec Kit project:
 specify init --here --integration cursor-agent
 ```
 
-gstack's Cursor `./setup --host cursor` may be broken
-([issue 2361](https://github.com/garrytan/gstack/issues/2361)); this repo
-keeps pstack native for Cursor.
+gstack does **not** ship a Cursor plugin manifest (no `.cursor-plugin`). Native
+`./setup --host cursor` is accepted by the installer even when `--help` omits
+`cursor` ([issue 2361](https://github.com/garrytan/gstack/issues/2361) is
+closed; the help text can still lag). That path requires bun and generates
+host-specific docs under `~/.cursor/skills/gstack-*`. This repo does not run
+it on boot. Instead `scripts/link-agent-skills.sh` flattens the vendored pack
+into `.cursor/skills/<name>` (project-local relative symlinks) and
+`~/.cursor/skills/<name>` using each skill's `name:` field. The slim vendor
+includes gstack `bin/` and `setup` so `gstack-skill-start` exists at
+`~/.claude/skills/gstack/bin/` (the preamble path in SKILL.md).
 
 ## Microsoft subset
 
