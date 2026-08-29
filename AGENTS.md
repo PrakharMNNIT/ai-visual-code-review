@@ -31,7 +31,12 @@ Agent) and are discovered automatically by compatible agents.
   - `agent-browser/` — browser QA CLI skill ([vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser))
   - `compound-engineering/` — learn/compound layer ([EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin))
   - `anthropics/` — engineering subset ([anthropics/skills](https://github.com/anthropics/skills))
-  - `awesome-copilot/` — GitHub issue/PR/`gh` subset ([github/awesome-copilot](https://github.com/github/awesome-copilot))
+  - `awesome-copilot/` — full `skills/` toolbox ([github/awesome-copilot](https://github.com/github/awesome-copilot))
+  - `spec-kit/` — Spec Kit command skills, v1.0.1 ([github/spec-kit](https://github.com/github/spec-kit))
+  - `microsoft/` — documented engineering subset ([microsoft/skills](https://github.com/microsoft/skills))
+  - `aws/` — AWS core + specialized skills ([aws/agent-toolkit-for-aws](https://github.com/aws/agent-toolkit-for-aws))
+  - `cloudflare/` — Workers / Wrangler skills ([cloudflare/skills](https://github.com/cloudflare/skills))
+  - `supabase/` — Supabase / Postgres / RLS ([supabase/agent-skills](https://github.com/supabase/agent-skills))
 - Why these packs, which ones were skipped, and the one-methodology pipeline:
   [`docs/agent-skill-packs.md`](docs/agent-skill-packs.md).
 - Slimmed installs (`SKILL.md`, references, skill `scripts/`). Refresh with:

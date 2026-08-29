@@ -20,10 +20,15 @@ Prime Agent.
 | `agent-browser/` | [`vercel-labs/agent-browser`](https://github.com/vercel-labs/agent-browser) | Apache-2.0 |
 | `compound-engineering/` | [`EveryInc/compound-engineering-plugin`](https://github.com/EveryInc/compound-engineering-plugin) | MIT |
 | `anthropics/` | [`anthropics/skills`](https://github.com/anthropics/skills) (engineering subset) | Apache-2.0 (per skill) |
-| `awesome-copilot/` | [`github/awesome-copilot`](https://github.com/github/awesome-copilot) (issue/PR/`gh` subset) | MIT |
+| `awesome-copilot/` | [`github/awesome-copilot`](https://github.com/github/awesome-copilot) (full `skills/` toolbox) | MIT |
+| `spec-kit/` | [`github/spec-kit`](https://github.com/github/spec-kit) (command templates as skills, v1.0.1) | MIT |
+| `microsoft/` | [`microsoft/skills`](https://github.com/microsoft/skills) (documented subset) | MIT |
+| `aws/` | [`aws/agent-toolkit-for-aws`](https://github.com/aws/agent-toolkit-for-aws) (`skills/` tree) | Apache-2.0 |
+| `cloudflare/` | [`cloudflare/skills`](https://github.com/cloudflare/skills) | Apache-2.0 |
+| `supabase/` | [`supabase/agent-skills`](https://github.com/supabase/agent-skills) | MIT |
 
 - Full index: [`docs/agent-skills.md`](../../docs/agent-skills.md).
 - Why these packs: [`docs/agent-skill-packs.md`](../../docs/agent-skill-packs.md).
 - Slimmed install: `SKILL.md`, Markdown references, and each skill's `scripts/`.
 - Refresh: `./scripts/install-agent-skills.sh && node scripts/gen-skills-index.js`.
-- Pipeline: find-skills → spec (gstack **or** spec-kit **or** CE) → interrogate → implement → review → ToB → agent-browser QA → ship → CE compound. One methodology per stage. Spec Kit is not vendored; see the packs doc.
+- Pipeline: find-skills → spec (gstack **XOR** spec-kit **XOR** CE) → interrogate → implement (pstack **XOR** Superpowers) → review → ToB → agent-browser QA → ship → CE compound. Never run CE + gstack + Superpowers + pstack on the same task.

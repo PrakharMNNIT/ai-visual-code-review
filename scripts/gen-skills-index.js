@@ -95,10 +95,40 @@ const PACK_META = {
     note: 'frontend-design, webapp-testing, mcp-builder, skill-creator, claude-api only. No pptx/xlsx/docx/art/branding/gifs.'
   },
   'awesome-copilot': {
-    title: 'Awesome Copilot (GitHub workflow subset)',
+    title: 'Awesome Copilot (toolbox shelf)',
     source: 'github/awesome-copilot',
     version: 'f11a4e4',
-    note: 'Issue, PR, Actions, and gh workflow skills only. Upstream is 400+ skills; this repo vendors a documented subset.'
+    note: 'Full skills/ tree as a toolbox shelf (ChatGPT --skill \'*\'). Discover on demand; do not always-apply the catalog.'
+  },
+  'spec-kit': {
+    title: 'GitHub Spec Kit (command skills)',
+    source: 'github/spec-kit',
+    version: '1.0.1',
+    note: 'Command templates vendored as Agent Skills. Do not specify-init this Express app. Greenfield: specify init --here --integration cursor-agent.'
+  },
+  microsoft: {
+    title: 'Microsoft skills (selective subset)',
+    source: 'microsoft/skills',
+    version: '7066b58',
+    note: 'Documented engineering/docs/review subset. Not the whole ~175-skill Azure catalog (context rot).'
+  },
+  aws: {
+    title: 'AWS agent toolkit',
+    source: 'aws/agent-toolkit-for-aws',
+    version: 'ed19c44',
+    note: 'skills/ core + specialized (Apache-2.0). Plugin duplicates under plugins/ are not copied.'
+  },
+  cloudflare: {
+    title: 'Cloudflare skills',
+    source: 'cloudflare/skills',
+    version: 'f96bff7',
+    note: 'Workers, Wrangler, Durable Objects, and related Cloudflare skills (Apache-2.0).'
+  },
+  supabase: {
+    title: 'Supabase agent skills',
+    source: 'supabase/agent-skills',
+    version: '8331f91',
+    note: 'Supabase backend, Postgres, and RLS skills (MIT).'
   }
 };
 
@@ -182,7 +212,9 @@ md += '| Fixing CI / merge conflicts | `cursor-team-kit/fix-ci`, `cursor-team-ki
 md += '| QA of the web UI | `agent-browser/agent-browser`, `gstack/qa`, `anthropics/webapp-testing` |\n';
 md += '| Planning and shipping | `superpowers/writing-plans`, `superpowers/executing-plans`, `gstack/ship`, `addyosmani/shipping-and-launch` |\n';
 md += '| UI craft | `anthropics/frontend-design`, `vercel-agent-skills/web-design-guidelines` |\n';
-md += '| GitHub issues / PRs | `awesome-copilot/github-issues`, `mattpocock/triage` |\n';
+md += '| GitHub issues / PRs | `awesome-copilot/github-issues`, `mattpocock/triage`, `microsoft/github-issue-creator` |\n';
+md += '| Spec-driven (pick one) | `spec-kit/*` **or** `gstack/spec` **or** Compound Engineering spec skills |\n';
+md += '| AWS / Cloudflare / Supabase | `aws/*`, `cloudflare/*`, `supabase/*` when that stack is in play |\n';
 md += '| Compound after ship | `compound-engineering/ce-compound` (not on the same task as gstack, Superpowers, or pstack) |\n\n';
 md += 'Pick **one** spec/implement methodology per task. Do not run gstack, Superpowers, pstack, and Compound Engineering together.\n\n';
 md += '### Complementary Cursor tooling (enable in the Cursor UI)\n\n';

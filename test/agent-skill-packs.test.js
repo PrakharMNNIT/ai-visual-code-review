@@ -16,7 +16,39 @@ const PACKS = [
   'agent-browser',
   'compound-engineering',
   'anthropics',
-  'awesome-copilot'
+  'awesome-copilot',
+  'spec-kit',
+  'microsoft',
+  'aws',
+  'cloudflare',
+  'supabase'
+];
+
+const MICROSOFT_SUBSET = [
+  'cloud-solution-architect',
+  'continual-learning',
+  'copilot-sdk',
+  'frontend-design-review',
+  'github-issue-creator',
+  'mcp-builder',
+  'microsoft-docs',
+  'skill-creator',
+  'wiki-agents-md',
+  'wiki-architect',
+  'wiki-changelog',
+  'wiki-llms-txt',
+  'wiki-onboarding',
+  'wiki-page-writer',
+  'wiki-qa',
+  'wiki-researcher'
+];
+
+const SPECKIT_COMMANDS = [
+  'constitution',
+  'specify',
+  'plan',
+  'tasks',
+  'implement'
 ];
 
 const PSTACK_SLUGS = new Set([
@@ -71,7 +103,12 @@ describe('vendored agent skill packs', () => {
       'agent-browser',
       'Compound Engineering',
       'Anthropic example skills',
-      'Awesome Copilot'
+      'Awesome Copilot',
+      'GitHub Spec Kit',
+      'Microsoft skills',
+      'AWS agent toolkit',
+      'Cloudflare skills',
+      'Supabase agent skills'
     ]) {
       expect(index).toContain(pack);
     }
@@ -98,28 +135,76 @@ describe('vendored agent skill packs', () => {
     }
   });
 
-  test('awesome-copilot is a GitHub workflow subset, not the full catalog', () => {
+  test('awesome-copilot is the full toolbox shelf, not a 15-skill subset', () => {
     const dir = path.join(ROOT, '.claude/skills/awesome-copilot');
+    const n = countSkills(dir);
+    expect(n).toBeGreaterThan(200);
+    expect(n).toBeLessThan(2000);
     const names = skillDirNames(dir);
     expect(names).toContain('github-issues');
-    expect(names).toContain('gh-attach');
-    expect(names).toContain('copilot-pr-autopilot');
-    expect(names).not.toContain('adobe-illustrator-scripting');
-    expect(names.length).toBeLessThan(40);
+    expect(names).toContain('adobe-illustrator-scripting');
+  });
+});
+
+describe('spec-kit, microsoft subset, and stack packs', () => {
+  test('spec-kit is vendored as command skills without specify-init in app source', () => {
+    const dir = path.join(ROOT, '.claude/skills/spec-kit');
+    expect(fs.existsSync(dir)).toBe(true);
+    for (const cmd of SPECKIT_COMMANDS) {
+      expect(fs.existsSync(path.join(dir, cmd, 'SKILL.md'))).toBe(true);
+    }
+    expect(countSkills(dir)).toBeGreaterThanOrEqual(5);
+    expect(fs.existsSync(path.join(ROOT, '.specify'))).toBe(false);
+    const packs = fs.readFileSync(path.join(ROOT, 'docs/agent-skill-packs.md'), 'utf8');
+    expect(packs).toContain('specify init --here --integration cursor-agent');
+    expect(packs).toContain('git+https://github.com/github/spec-kit.git@v1.0.1');
+    expect(packs).toContain('find-skills → spec');
+  });
+
+  test('microsoft is a documented subset, not the whole catalog', () => {
+    const dir = path.join(ROOT, '.claude/skills/microsoft');
+    const names = skillDirNames(dir).sort();
+    expect(names).toEqual([...MICROSOFT_SUBSET].sort());
     expect(names.length).toBeGreaterThan(10);
+    expect(names.length).toBeLessThan(40);
+    expect(names).not.toContain('azure-cosmos-py');
+    expect(names).not.toContain('podcast-generation');
+    const installer = fs.readFileSync(path.join(ROOT, 'scripts/install-agent-skills.sh'), 'utf8');
+    const packsDoc = fs.readFileSync(path.join(ROOT, 'docs/agent-skill-packs.md'), 'utf8');
+    expect(installer).toContain('MICROSOFT_SKILLS=');
+    for (const name of MICROSOFT_SUBSET) {
+      expect(installer).toContain(name);
+      expect(packsDoc).toContain(name);
+    }
+  });
+
+  test('aws, cloudflare, and supabase packs are present', () => {
+    const aws = countSkills(path.join(ROOT, '.claude/skills/aws'));
+    const cf = countSkills(path.join(ROOT, '.claude/skills/cloudflare'));
+    const sb = countSkills(path.join(ROOT, '.claude/skills/supabase'));
+    expect(aws).toBeGreaterThan(20);
+    expect(cf).toBeGreaterThan(5);
+    expect(sb).toBeGreaterThanOrEqual(2);
+    expect(fs.existsSync(path.join(ROOT, '.agents/skills/aws'))).toBe(true);
+    expect(fs.existsSync(path.join(ROOT, '.agents/skills/cloudflare'))).toBe(true);
+    expect(fs.existsSync(path.join(ROOT, '.agents/skills/supabase'))).toBe(true);
+  });
+
+  test('awesome-copilot is much larger than the microsoft subset', () => {
+    const awesome = countSkills(path.join(ROOT, '.claude/skills/awesome-copilot'));
+    const ms = countSkills(path.join(ROOT, '.claude/skills/microsoft'));
+    expect(awesome).toBeGreaterThan(ms * 5);
   });
 });
 
 describe('skill pack policy and setup docs', () => {
-  test('spec-kit is documented, not vendored as a skill pack', () => {
-    expect(fs.existsSync(path.join(ROOT, '.claude/skills/spec-kit'))).toBe(false);
+  test('pipeline docs keep XOR methodology and stack sources', () => {
     const packs = fs.readFileSync(path.join(ROOT, 'docs/agent-skill-packs.md'), 'utf8');
-    expect(packs).toContain('specify init --here --integration cursor-agent');
-    expect(packs).toContain('find-skills → spec');
     expect(packs).toContain('microsoft/skills');
     expect(packs).toContain('aws/agent-toolkit-for-aws');
     expect(packs).toContain('cloudflare/skills');
     expect(packs).toContain('supabase/agent-skills');
+    expect(packs).toContain('Never run Compound Engineering, gstack, Superpowers, and pstack');
   });
 
   test('matt pocock setup records GitHub issues, default labels, and single-context docs', () => {
@@ -137,21 +222,25 @@ describe('skill pack policy and setup docs', () => {
     expect(fs.existsSync(file)).toBe(true);
     const text = fs.readFileSync(file, 'utf8');
     expect(text).toContain('alwaysApply: true');
-    const unknown = [];
-    for (const line of text.split('\n')) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('---')) continue;
-      if (trimmed.startsWith('description:') || trimmed.startsWith('alwaysApply:')) continue;
-      const colon = trimmed.indexOf(':');
-      if (colon === -1) continue;
-      const rhs = trimmed.slice(colon + 1);
-      for (const slug of rhs.split(',').map((s) => s.trim()).filter(Boolean)) {
-        if (!PSTACK_SLUGS.has(slug)) unknown.push(slug);
-      }
-    }
-    expect(unknown).toEqual([]);
+    expect(unknownPstackSlugs(text)).toEqual([]);
   });
 });
+
+function unknownPstackSlugs(text) {
+  const unknown = [];
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('---')) continue;
+    if (trimmed.startsWith('description:') || trimmed.startsWith('alwaysApply:')) continue;
+    const colon = trimmed.indexOf(':');
+    if (colon === -1) continue;
+    const rhs = trimmed.slice(colon + 1);
+    for (const slug of rhs.split(',').map((s) => s.trim()).filter(Boolean)) {
+      if (!PSTACK_SLUGS.has(slug)) unknown.push(slug);
+    }
+  }
+  return unknown;
+}
 
 function findSkill(dir) {
   const stack = [dir];
