@@ -75,10 +75,28 @@ skill_allowed() {
   esac
 }
 
+assert_github_slug() {
+  local repo="$1"
+  case "$repo" in
+    *[!A-Za-z0-9._/-]*|/*|*/*/*|*//*|*/|*..*)
+      echo "install-agent-skills: invalid GitHub repo slug: $repo" >&2
+      exit 1
+      ;;
+  esac
+  case "$repo" in
+    */*) ;;
+    *)
+      echo "install-agent-skills: repo must be owner/name: $repo" >&2
+      exit 1
+      ;;
+  esac
+}
+
 clone_repo() {
   local repo="$1"
   local ref="${2:-}"
   local key src
+  assert_github_slug "$repo"
   key="$(echo "${repo}_${ref}" | tr '/' '_')"
   src="$TMP/$key"
   if [ -d "$src/.git" ]; then
@@ -88,9 +106,9 @@ clone_repo() {
   fi
   echo ">> cloning $repo ${ref:+@$ref}" >&2
   if [ -n "$ref" ]; then
-    git clone --depth 1 --branch "$ref" "https://github.com/$repo.git" "$src" >/dev/null 2>&1
+    git clone --depth 1 --branch "$ref" "https://github.com/$repo.git" "$src"
   else
-    git clone --depth 1 "https://github.com/$repo.git" "$src" >/dev/null 2>&1
+    git clone --depth 1 "https://github.com/$repo.git" "$src"
   fi
   printf '%s' "$src"
 }

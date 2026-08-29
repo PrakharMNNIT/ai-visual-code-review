@@ -198,6 +198,14 @@ describe('spec-kit, microsoft subset, and stack packs', () => {
 });
 
 describe('skill pack policy and setup docs', () => {
+  test('installer validates GitHub slugs and pins spec-kit v1.0.1', () => {
+    const installer = fs.readFileSync(path.join(ROOT, 'scripts/install-agent-skills.sh'), 'utf8');
+    expect(installer).toContain('assert_github_slug');
+    expect(installer).toContain('SPECKIT_TAG="v1.0.1"');
+    expect(installer).toContain('awesome-copilot|github/awesome-copilot|skills|LICENSE||');
+    expect(installer).not.toContain('AWESOME_GH_SKILLS=');
+  });
+
   test('pipeline docs keep XOR methodology and stack sources', () => {
     const packs = fs.readFileSync(path.join(ROOT, 'docs/agent-skill-packs.md'), 'utf8');
     expect(packs).toContain('microsoft/skills');
