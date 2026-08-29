@@ -21,7 +21,8 @@ const PACKS = [
   'microsoft',
   'aws',
   'cloudflare',
-  'supabase'
+  'supabase',
+  'praxstack'
 ];
 
 const MICROSOFT_SUBSET = [
@@ -108,7 +109,8 @@ describe('vendored agent skill packs', () => {
       'Microsoft skills',
       'AWS agent toolkit',
       'Cloudflare skills',
-      'Supabase agent skills'
+      'Supabase agent skills',
+      'Prax skills-and-personas'
     ]) {
       expect(index).toContain(pack);
     }
@@ -204,6 +206,7 @@ describe('skill pack policy and setup docs', () => {
     expect(installer).toContain('assert_github_slug');
     expect(installer).toContain('SPECKIT_TAG="v1.0.1"');
     expect(installer).toContain('awesome-copilot|github/awesome-copilot|skills|LICENSE||');
+    expect(installer).toContain('praxstack|praxstack/skills-and-personas|new-skills|LICENSE||');
     expect(installer).not.toContain('AWESOME_GH_SKILLS=');
   });
 
@@ -213,6 +216,8 @@ describe('skill pack policy and setup docs', () => {
     expect(packs).toContain('aws/agent-toolkit-for-aws');
     expect(packs).toContain('cloudflare/skills');
     expect(packs).toContain('supabase/agent-skills');
+    expect(packs).toContain('praxstack/skills-and-personas');
+    expect(packs).toContain('personal OS');
     expect(packs).toContain('.cursor/skills');
     expect(packs).toContain('/plan-ceo-review');
     expect(packs).toContain('Never run Compound Engineering, gstack, Superpowers, and pstack');
@@ -234,6 +239,57 @@ describe('skill pack policy and setup docs', () => {
     const text = fs.readFileSync(file, 'utf8');
     expect(text).toContain('alwaysApply: true');
     expect(unknownPstackSlugs(text)).toEqual([]);
+  });
+});
+
+describe('praxstack skills-and-personas pack', () => {
+  test('canonical portfolio plus public extras are vendored in both skill roots', () => {
+    const required = [
+      'kingmode',
+      'constellation-team',
+      'backend-pe-nodejs',
+      'apex-autonomous-mode',
+      'teach-pro-max',
+      'superimprove',
+      'coding-agent-leadership-principles',
+      'cross-agent-handoff'
+    ];
+    for (const root of ['.claude/skills/praxstack', '.agents/skills/praxstack']) {
+      const dir = path.join(ROOT, root);
+      expect(countSkills(dir)).toBeGreaterThanOrEqual(41);
+      for (const name of required) {
+        expect(fs.existsSync(path.join(dir, name, 'SKILL.md'))).toBe(true);
+      }
+      expect(fs.existsSync(path.join(dir, 'SAFETY.md'))).toBe(true);
+      expect(fs.existsSync(path.join(dir, 'NOTICE.md'))).toBe(true);
+      expect(fs.existsSync(path.join(dir, 'LICENSE'))).toBe(true);
+    }
+  });
+
+  test('Cursor flatten exposes Prax skills one level deep without collisions', () => {
+    const king = path.join(ROOT, '.cursor/skills/kingmode');
+    expect(fs.lstatSync(king).isSymbolicLink()).toBe(true);
+    expect(fs.readlinkSync(king)).toBe('../../.claude/skills/praxstack/kingmode');
+    expect(fs.existsSync(path.join(ROOT, '.cursor/skills/teach-pro-max', 'SKILL.md'))).toBe(true);
+    const log = fs.readFileSync(path.join(ROOT, 'docs/praxstack-skill-collisions.md'), 'utf8');
+    expect(log).toContain('No collisions on this run');
+  });
+
+  test('constellation agents land in Claude, Cursor, and Codex harness paths', () => {
+    for (const file of [
+      '.claude/agents/principal-engineer.md',
+      '.cursor/agents/principal-engineer.md',
+      '.codex/agents/principal-engineer.toml'
+    ]) {
+      expect(fs.existsSync(path.join(ROOT, file))).toBe(true);
+    }
+  });
+
+  test('AGENTS.md documents Prax pack as on-demand personal OS, not a fifth conductor', () => {
+    const agents = fs.readFileSync(path.join(ROOT, 'AGENTS.md'), 'utf8');
+    expect(agents).toContain('skills-and-personas');
+    expect(agents).toContain('personal OS');
+    expect(agents).not.toMatch(/run gstack, Superpowers, pstack, Compound Engineering, and Prax/i);
   });
 });
 

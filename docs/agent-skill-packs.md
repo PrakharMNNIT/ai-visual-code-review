@@ -55,6 +55,7 @@ not a substitute for that bar.
 | AWS | [aws/agent-toolkit-for-aws](https://github.com/aws/agent-toolkit-for-aws) | `skills/` core + specialized (Apache-2.0). Layout confirmed: `skills/core-skills` and `skills/specialized-skills`. |
 | Cloudflare | [cloudflare/skills](https://github.com/cloudflare/skills) | Workers, Wrangler, Durable Objects, and related (Apache-2.0). |
 | Supabase | [supabase/agent-skills](https://github.com/supabase/agent-skills) | Backend, Postgres, RLS (MIT). |
+| Prax skills-and-personas | [praxstack/skills-and-personas](https://github.com/praxstack/skills-and-personas) | Prax's **personal OS / personas rack**. On-demand. Not a fifth methodology conductor. See [`docs/agents/praxstack-skills-and-personas.md`](agents/praxstack-skills-and-personas.md). |
 
 pstack was previously vendored from [michael-denyer/pstack-claude](https://github.com/michael-denyer/pstack-claude), a Claude Code and Codex port of the same skills. That port remains useful on those harnesses. This repo's agents run in Cursor, so the installer clones `cursor/plugins` and copies `pstack/skills`.
 
@@ -194,6 +195,7 @@ Do not run `npx skills add ... --all`. Cloud Agents need the files in git.
 - [aws/agent-toolkit-for-aws](https://github.com/aws/agent-toolkit-for-aws) (Apache-2.0)
 - [cloudflare/skills](https://github.com/cloudflare/skills) (Apache-2.0)
 - [supabase/agent-skills](https://github.com/supabase/agent-skills) (MIT)
+- [praxstack/skills-and-personas](https://github.com/praxstack/skills-and-personas) (MIT; Prax personal OS)
 - [Agent Skills spec](https://agentskills.io)
 - [Cursor skills docs](https://cursor.com/docs/skills)
 - [michael-denyer/pstack-claude](https://github.com/michael-denyer/pstack-claude) (Claude Code port of official pstack)

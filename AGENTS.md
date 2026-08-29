@@ -37,6 +37,7 @@ Agent) and are discovered automatically by compatible agents.
   - `aws/` — AWS core + specialized skills ([aws/agent-toolkit-for-aws](https://github.com/aws/agent-toolkit-for-aws))
   - `cloudflare/` — Workers / Wrangler skills ([cloudflare/skills](https://github.com/cloudflare/skills))
   - `supabase/` — Supabase / Postgres / RLS ([supabase/agent-skills](https://github.com/supabase/agent-skills))
+  - `praxstack/` — Prax's personal OS / personas ([praxstack/skills-and-personas](https://github.com/praxstack/skills-and-personas))
 - Why these packs, which ones were skipped, and the one-methodology pipeline:
   [`docs/agent-skill-packs.md`](docs/agent-skill-packs.md).
 - Slimmed installs (`SKILL.md`, references, skill `scripts/`). Refresh with:
@@ -47,6 +48,26 @@ Agent) and are discovered automatically by compatible agents.
 When a task matches a skill's trigger description, read that skill's `SKILL.md`
 and follow it. Do not run gstack, Superpowers, pstack, and Compound Engineering
 as four simultaneous methodologies on the same task.
+
+### Prax's skills-and-personas
+
+Prax's own rack (goals, skills, personas, setup workflows) from
+[`praxstack/skills-and-personas`](https://github.com/praxstack/skills-and-personas).
+On-demand personal OS — not a fifth conductor next to gstack / Superpowers /
+pstack / Compound Engineering.
+
+- Skills: `.claude/skills/praxstack/` and `.agents/skills/praxstack/` (canonical
+  `new-skills/` portfolio plus slim `teach-pro-max`, `superimprove`,
+  `coding-agent-leadership-principles`, `cross-agent-handoff`).
+- Cursor slash discovery: flattened `.cursor/skills/<name>/` via
+  `scripts/link-praxstack-skills.sh` (for example `/kingmode`, `/apex-autonomous-mode`).
+- Personas / constellation agents: `.cursor/agents/`, `.claude/agents/`,
+  `.codex/agents/` — invoke when the role matches; do not always-apply.
+- Goals: no Cursor Goal files in upstream. Use `apex-autonomous-mode` /
+  `autonomous-orchestrion`, or paste prompts from
+  `.claude/skills/praxstack/workflows/high-end-operator/`.
+- Catalog and install notes: [`docs/agents/praxstack-skills-and-personas.md`](docs/agents/praxstack-skills-and-personas.md).
+  Mental-health skill scope: pack `SAFETY.md`.
 
 ### Issue tracker
 

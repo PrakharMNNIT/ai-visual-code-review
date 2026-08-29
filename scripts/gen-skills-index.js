@@ -129,6 +129,12 @@ const PACK_META = {
     source: 'supabase/agent-skills',
     version: '8331f91',
     note: 'Supabase backend, Postgres, and RLS skills (MIT).'
+  },
+  praxstack: {
+    title: 'Prax skills-and-personas',
+    source: 'praxstack/skills-and-personas',
+    version: '78a7ee9',
+    note: "Prax's personal OS / personas rack (MIT). On-demand. Not a fifth methodology conductor."
   }
 };
 

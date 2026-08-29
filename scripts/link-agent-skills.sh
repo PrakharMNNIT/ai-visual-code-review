@@ -129,5 +129,8 @@ link_packs "$REPO_ROOT/.claude/skills"  "$HOME_DIR/.claude/skills"
 link_packs "$REPO_ROOT/.agents/skills" "$HOME_DIR/.agents/skills"
 link_gstack_cursor_skills
 install_pstack_models
+if [ -f "$REPO_ROOT/scripts/link-praxstack-skills.sh" ]; then
+  bash "$REPO_ROOT/scripts/link-praxstack-skills.sh"
+fi
 
 echo "link-agent-skills: done"
