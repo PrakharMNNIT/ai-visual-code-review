@@ -68,7 +68,11 @@ describe('all-pack Cursor skill flatten', () => {
     };
     for (const [name, real] of Object.entries(required)) {
       const dest = path.join(PROJECT_SKILLS, name);
-      expect(fs.existsSync(path.join(dest, 'SKILL.md'))).toBe(true);
+      const skillMd = path.join(dest, 'SKILL.md');
+      expect({ name, skillMdExists: fs.existsSync(skillMd) }).toEqual({
+        name,
+        skillMdExists: true
+      });
       expect(fs.lstatSync(dest).isSymbolicLink()).toBe(true);
       expect(skillRealPath(dest)).toBe(fs.realpathSync(real));
     }
