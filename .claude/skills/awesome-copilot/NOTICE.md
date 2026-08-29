@@ -1,1 +1,1 @@
-Subset only: GitHub issue, PR, Actions, and gh workflow skills. Upstream is 400+ skills; the rest stay on GitHub.
+Full github/awesome-copilot skills/ toolbox shelf (ChatGPT portable install is --skill '*'). Slimmed to SKILL.md, Markdown, scripts/, and references/. Discover a skill when the task matches; do not always-apply the whole catalog.
