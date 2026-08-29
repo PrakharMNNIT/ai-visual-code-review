@@ -108,7 +108,9 @@ describe('vendored agent skill packs', () => {
     expect(names.length).toBeLessThan(40);
     expect(names.length).toBeGreaterThan(10);
   });
+});
 
+describe('skill pack policy and setup docs', () => {
   test('spec-kit is documented, not vendored as a skill pack', () => {
     expect(fs.existsSync(path.join(ROOT, '.claude/skills/spec-kit'))).toBe(false);
     const packs = fs.readFileSync(path.join(ROOT, 'docs/agent-skill-packs.md'), 'utf8');
