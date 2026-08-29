@@ -34,7 +34,41 @@ link_packs() {
   done
 }
 
+# Cursor Cloud Task slugs live in the repo sheet. Copy them to the path
+# pstack skills read (~/.claude/pstack-models.md) and append the CLAUDE.md
+# include. Skip when CURSOR_AGENT is unset so a local Claude Code home
+# keeps its own override.
+install_pstack_models() {
+  local src="$REPO_ROOT/.cursor/pstack-models.md"
+  local dest="$HOME_DIR/.claude/pstack-models.md"
+  local claude_md="$HOME_DIR/.claude/CLAUDE.md"
+  local include_line="@~/.claude/pstack-models.md"
+
+  [ -f "$src" ] || { echo "link-agent-skills: $src not present, skipping pstack models"; return 0; }
+
+  if [ "${CURSOR_AGENT:-}" != "1" ]; then
+    echo "link-agent-skills: CURSOR_AGENT unset, leaving home pstack-models unchanged"
+    return 0
+  fi
+
+  mkdir -p "$HOME_DIR/.claude"
+  cp "$src" "$dest"
+  echo "link-agent-skills: installed $dest"
+
+  if [ -f "$claude_md" ] && grep -Fqx "$include_line" "$claude_md"; then
+    echo "link-agent-skills: $claude_md already includes $include_line"
+    return 0
+  fi
+  if [ -f "$claude_md" ] && [ -s "$claude_md" ]; then
+    printf '\n%s\n' "$include_line" >> "$claude_md"
+  else
+    printf '%s\n' "$include_line" > "$claude_md"
+  fi
+  echo "link-agent-skills: wired $include_line into $claude_md"
+}
+
 link_packs "$REPO_ROOT/.claude/skills"  "$HOME_DIR/.claude/skills"
 link_packs "$REPO_ROOT/.agents/skills" "$HOME_DIR/.agents/skills"
+install_pstack_models
 
 echo "link-agent-skills: done"

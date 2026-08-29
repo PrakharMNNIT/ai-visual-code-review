@@ -27,3 +27,8 @@ Agent) and are discovered automatically by compatible agents.
 
 When a task matches a skill's trigger description, read that skill's `SKILL.md`
 and follow it.
+
+When spawning a pstack subagent, use the role-to-model lines in
+`.cursor/pstack-models.md`. `scripts/link-agent-skills.sh` copies that sheet to
+`~/.claude/pstack-models.md` on Cursor Cloud boot, which is the path pstack
+skills read. Re-run `/setup-pstack` to change a role.
