@@ -102,6 +102,9 @@ code-reviews-*/
 .serena/
 graphify-out/
 .graphify/
+.cursor/mcp.local.json
+openspec/changes/
+openspec/specs/
 
 # OS generated files
 .DS_Store
@@ -121,11 +124,3 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
-
-# OpenSpec / Graphify / Serena generated data (do not commit indexes)
-graphify-out/
-.graphify/
-.serena/
-.cursor/mcp.local.json
-openspec/changes/
-openspec/specs/

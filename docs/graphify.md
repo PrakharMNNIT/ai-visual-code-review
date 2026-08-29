@@ -14,8 +14,21 @@ install). Flatten exposes `/graphify` via `.cursor/skills/graphify`.
 
 ## Indexing
 
-`graphify .` builds `graphify-out/` (can be slow on a large skill vendor).
-Cloud Agent **boot does not index**. After a successful index:
+Cloud Agent **boot does not index**. On this repo `graphify .` treats hundreds of
+vendored `SKILL.md` files as docs and **requires an LLM API key**. Do not commit
+keys. A no-key attempt:
+
+```
+graphify . --code-only --no-viz
+```
+
+still walks the skill vendor (slow, noisy). Prefer indexing application source
+only (`public/`, `services/`, `server.js`) after flatten is idle — never run
+Graphify concurrently with `scripts/link-agent-skills.sh` (that script prunes
+and rewrites `.cursor/skills`).
+
+`graphify-out/` is gitignored. The Cursor rule skips mandatory graph queries
+when `graphify-out/graph.json` is missing.
 
 ```
 graphify query "<question>"

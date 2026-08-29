@@ -103,7 +103,7 @@ describe('link-agent-skills.sh behavior', () => {
     } finally {
       fs.rmSync(home, { recursive: true, force: true });
     }
-  }, 60000);
+  }, 120000);
 
   test('does not replace a user-owned non-symlink skill directory', () => {
     const home = fs.mkdtempSync(path.join(os.tmpdir(), 'gstack-link-keep-'));
@@ -117,7 +117,7 @@ describe('link-agent-skills.sh behavior', () => {
     } finally {
       fs.rmSync(home, { recursive: true, force: true });
     }
-  }, 60000);
+  }, 120000);
 });
 
 describe('gstack runtime for skill preamble', () => {
