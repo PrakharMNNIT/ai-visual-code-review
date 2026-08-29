@@ -1,12 +1,12 @@
 # Agent Skills
 
-Vendored agent-skill packs, installed into both `.claude/skills/` (Claude Code, Cursor) and `.agents/skills/` (Codex, Prime Agent). Skills are discovered automatically by compatible agents via the [Agent Skills standard](https://skills.sh).
+Vendored agent-skill packs, installed into both `.claude/skills/` (Claude Code, Cursor) and `.agents/skills/` (Codex, Prime Agent). Skills are discovered automatically by compatible agents via the [Agent Skills standard](https://agentskills.io).
 
-> Slimmed install: only `SKILL.md` files and their Markdown references are vendored. Refresh with `./scripts/install-agent-skills.sh` then `node scripts/gen-skills-index.js`. All packs are MIT licensed; each pack directory keeps its upstream `LICENSE`.
+> Slimmed install: `SKILL.md`, Markdown references, and each skill's `scripts/` directory. Refresh with `./scripts/install-agent-skills.sh` then `node scripts/gen-skills-index.js`. Packs keep their upstream LICENSE when the clone has one. Why these packs, and which ones were skipped: [`docs/agent-skill-packs.md`](agent-skill-packs.md).
 
 ## Superpowers
 
-Source: [`obra/superpowers`](https://github.com/obra/superpowers) · v6.3.0 · MIT · Composable SDLC methodology skills.
+Source: [`obra/superpowers`](https://github.com/obra/superpowers) · v6.3.0 · Composable SDLC methodology skills.
 
 | Skill | Description |
 | --- | --- |
@@ -27,7 +27,7 @@ Source: [`obra/superpowers`](https://github.com/obra/superpowers) · v6.3.0 · M
 
 ## Matt Pocock — Skills for Real Engineers
 
-Source: [`mattpocock/skills`](https://github.com/mattpocock/skills) · v1.2.3 · MIT · Engineering & productivity skills.
+Source: [`mattpocock/skills`](https://github.com/mattpocock/skills) · v1.2.3 · Engineering and productivity skills.
 
 | Skill | Description |
 | --- | --- |
@@ -71,7 +71,7 @@ Source: [`mattpocock/skills`](https://github.com/mattpocock/skills) · v1.2.3 ·
 
 ## gstack (Garry Tan)
 
-Source: [`garrytan/gstack`](https://github.com/garrytan/gstack) · v1.69.0.0 · MIT · Role-based "virtual engineering team" skills (slimmed: Markdown only).
+Source: [`garrytan/gstack`](https://github.com/garrytan/gstack) · v1.72.0.0 · Role-based virtual engineering team skills (slimmed: Markdown plus skill scripts).
 
 | Skill | Description |
 | --- | --- |
@@ -137,28 +137,23 @@ Source: [`garrytan/gstack`](https://github.com/garrytan/gstack) · v1.69.0.0 · 
 
 ## pstack (Lauren Tan / poteto)
 
-Source: [`michael-denyer/pstack-claude`](https://github.com/michael-denyer/pstack-claude) · v0.9.14 · MIT · Rigorous agent workflow skills (Claude Code/Codex port of poteto's pstack).
+Source: [`cursor/plugins/pstack`](https://github.com/cursor/plugins/tree/main/pstack) · v0.14.5 · Official Cursor pstack. Rigorous agent workflow skills.
 
 | Skill | Description |
 | --- | --- |
 | `architect` | Sketch types, signatures, and module structure before code, then stay in the loop while implementation fills in. Use for /architect, 'architect this', 'design this', or non-trivial work where jumping to code would lock in the wrong shape. |
 | `arena` | Spawn N parallel candidates at the same task, pick a base, graft the strongest parts of the losers into it. Use for /arena, 'arena this', 'throw it in the arena', or when one attempt at a non-trivial artifact would lock in the wrong shape. |
-| `automate-me` | Use for \"automate me\", \"create/update/refresh my -mode skill\", \"turn/capture my preferences or working style into a skill\", or wanting agents to follow how the user works. Drafts or revises a personal -mode skill via plugin-dev:skill-development + unslop, optionally pulling fresh evidence from recent transcripts. |
-| `babysit` | Watch an open PR — fix failing CI, handle the straightforward review comments, and drive it to a mergeable state. Claude Code analog of Cursor's built-in /babysit. Use after opening a PR when the user wants the agent to shepherd it without re-prompting. |
+| `automate-me` | Use for \"automate me\", \"create/update/refresh my -mode skill\", \"turn/capture my preferences or working style into a skill\", or wanting agents to follow how the user works. Drafts or revises a personal -mode skill via create-skill + unslop, optionally pulling fresh evidence from recent transcripts. |
 | `blast-radius` | Find what a change could break somewhere else before it ships, beyond the diff, and prove the one fact it's safe because of by running real code instead of writing it up. Use for 'blast radius of X', 'what could this break', or reviewing a small diff you don't trust. |
-| `bro` | Restate the last message in plain human language, with no jargon. Use for /bro or when asked to say it plainly. |
+| `bro` | Restate the last message in plain human language, with no jargon. |
 | `create-verification-skill` | Generate a project-local verification skill that drives your app the way a user does — any language, framework, or platform. Use for /create-verification-skill, \"make a control skill for this repo\", or when a project has no scripted way to prove UI/CLI/service behavior. |
-| `deslop` | Remove AI-generated code slop and clean up code style |
 | `figure-it-out` | Design an auditable playbook when no narrower one fits: a large migration, an ambitious multi-part change, or work a human reviews after stepping away. Scales rigor to the task, runs a hypothesis loop, and logs decisions via show-me-your-work. Use for /figure-it-out, 'figure it out', a large migration, or when no narrower playbook applies. |
-| `fix-ci` | Find failing PR checks, inspect logs or external check links, and apply focused fixes |
-| `fix-merge-conflicts` | Resolve merge conflicts non-interactively, validate build and tests, and finalize conflict resolution |
-| `get-pr-comments` | Fetch and summarize review comments from the active pull request |
 | `how` | Use for \"how does X work\", code walkthroughs before changing something, and placement / ownership / layering questions (\"where should this live\", \"which package owns this\", \"is this the right layer\"). Explains subsystem architecture, runtime flow, onboarding mental models. Can critique architecture. Use why for motivation. |
 | `interrogate` | Use for \"interrogate\", \"adversarial review\", \"multi-model review\", \"challenge this\", \"stress test this code\", \"find blind spots\", or \"tear this apart\". Multiple LLM reviewers challenge changes from independent angles. |
 | `maintain-verification-skill` | Periodic pass that keeps a project's verification skill and feature map honest: parallel source readers per feature, one live session driving every feature, at most one PR of proven corrections. Use for /maintain-verification-skill or \"audit the verify skill\". |
-| `make-pr-easy-to-review` | Prepare PRs for review by cleaning noisy history, improving PR descriptions, and adding reviewer guidance without changing code behavior. Use for "make this easy to review", "tidy this PR", "clean up commits", or "annotate the diff". |
-| `no-comments` | Spawn the comment-sicko subagent, fix accepted findings, and offer encodings for claimed constraints. |
-| `poteto-mode` | poteto's agent style for concise, detailed responses, deliberate subagents, unslopped prose, simple code, and verified work. Use for poteto, /poteto-mode, or requests to work in this style. |
+| `Make Bot UI` | >- |
+| `no-comments` | Spawn Comment Sicko, fix accepted findings, and offer encodings for claimed constraints. |
+| `Poteto Mode` | poteto's agent style for concise, detailed responses, deliberate subagents, unslopped prose, simple code, and verified work. Use for poteto, /poteto-mode, or requests to work in this style. |
 | `principle-boundary-discipline` | Apply when wiring validation, error handling, or framework adapters. Concentrate guards at system boundaries (CLI, config, network, external APIs); trust internal types and keep business logic in pure functions. |
 | `principle-build-the-lever` | Apply to any non-trivial work, not just bulk work: edits, migrations, analyses, checks. Build the tool that does it or proves it (codemod, script, generator, or a skill your subagents follow) instead of working by hand. The tool is the artifact a reviewer can rerun. |
 | `principle-encode-lessons-in-structure` | Apply when you catch yourself writing the same instruction a second time, or notice a recurring correction. Encode the rule as a lint, metadata flag, runtime check, or script instead of more text. |
@@ -182,21 +177,100 @@ Source: [`michael-denyer/pstack-claude`](https://github.com/michael-denyer/pstac
 | `principle-type-system-discipline` | Apply when designing types, reviewing a function signature, or writing code in any statically-typed language. Make illegal states unrepresentable, brand semantic primitives, parse external data at boundaries, refuse to lie to the compiler, exhaust variants, derive from authoritative schemas. |
 | `recall` | Reconstruct your recent working context from your own chat history, live state, and the shared record (user reports, prior fixes, incidents), then hand back a tight current-state brief. Use for 'recall my work on X', 'catch me up', 'what have I been working on', 'where did I leave off', before starting or resuming work. |
 | `reflect` | Spawn three parallel review subagents over the active transcript, surface learnings, and route each to a concrete edit on an existing skill. Use when the user says reflect. |
-| `setup-pstack` | Configure which models pstack uses per role. Detects your available Claude models and writes a per-role override file that the user can include from their CLAUDE.md. Use for /setup-pstack, "configure pstack models", or changing pstack's model choices. |
+| `setup-pstack` | Configure which models pstack uses per role. Detects your available models and writes an always-applied rule that overrides the skill defaults. Use for /setup-pstack, "configure pstack models", or changing pstack's model choices. |
 | `show-me-your-work` | Keep a reviewable decision trail for long-running or unattended work: a TSV log with one row per decision (what, why, evidence, result). Local by default; commit it when a reviewer needs the trail to trust the result. Use for /show-me-your-work, autonomous or multi-phase runs, or work a human reviews after stepping away. |
 | `swarm` | Fan out N parallel workers, drain them, and return one report. Use for /swarm, 'swarm this', or parallel coverage, races, gauntlets, and exploration. |
 | `tdd` | Use only when the user explicitly asks for TDD, a failing test, or a regression test, OR when the bug has an obvious cheap local test target. Skip when the test path is unclear, expensive, integration-heavy, or not requested. |
 | `teach` | Explain a body of work plainly so a person actually understands it. Runs the `how` and `why` skills and weaves what they find into one clear explanation. Use for 'teach me this', 'help me really understand X', 'explain this change or subsystem to me'. |
 | `technical-writing` | Layered technical-writing standard: Diátaxis structure, Google developer style sentences, STE instruction rules, Global English syntax. Use for /technical-writing or when writing or reviewing docs, RFCs, readmes, PR descriptions, or commit messages. |
-| `thermo-nuclear-code-quality-review` | Run an extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Use for a thermo-nuclear code quality review, thermonuclear review, deep code quality audit, or especially harsh maintainability review. |
 | `typescript-best-practices` | TypeScript best practices. Use when reading or editing any .ts or .tsx file. |
 | `unslop` | Cut AI tells from any writing. Must always apply. |
-| `what-did-i-get-done` | Summarize authored commits over a user-specified time period into a concise update |
 | `why` | Use for 'why does X work this way', 'why we picked Y', design rationale, regressions, postmortems, or data-backed thresholds. Discovers available MCPs and queries each evidence category (source control, issue tracker, long-form docs, real-time chat, infrastructure observability, error tracking, product analytics warehouse) in parallel, then returns a cited read on decisions and tradeoffs. Use how for runtime behavior. |
+
+## improve (shadcn)
+
+Source: [`shadcn/improve`](https://github.com/shadcn/improve) · v03369ee · Audits a codebase and writes execution plans. Does not implement the plans itself.
+
+| Skill | Description |
+| --- | --- |
+| `improve` | Survey any codebase as a senior advisor and produce prioritized, self-contained implementation plans for OTHER models/agents to execute. Strictly read-only on source code — never implements, fixes, or refactors anything itself. Use when asked to audit a codebase, find improvement opportunities (bugs, security, performance, test coverage, tech debt, migrations, DX), suggest features or where to take the project next (roadmap, product direction), or generate handoff plans for another agent to implement. |
+
+## Cursor Team Kit
+
+Source: [`cursor/plugins/cursor-team-kit`](https://github.com/cursor/plugins/tree/main/cursor-team-kit) · v1.2.0 · Cursor internal CI, review, shipping, and verification workflows.
+
+| Skill | Description |
+| --- | --- |
+| `check-compiler-errors` | Run compile and type-check commands and report failures |
+| `control-cli` | Build or adapt a local harness to drive, inspect, and profile an interactive CLI or TUI without external services. Use for CLI UX checks, startup regressions, memory leaks, hangs, prompt flows, or terminal demos. |
+| `control-ui` | Build or adapt a local browser/CDP harness to drive and inspect a web, IDE, or Electron UI. Use for local UI verification, screenshots, accessibility snapshots, perf profiles, visual diffs, or reproducing UI bugs. |
+| `deslop` | Remove AI-generated code slop and clean up code style |
+| `fix-ci` | Find failing PR checks, inspect logs or external check links, and apply focused fixes |
+| `fix-merge-conflicts` | Resolve merge conflicts non-interactively, validate build and tests, and finalize conflict resolution |
+| `get-pr-comments` | Fetch and summarize review comments from the active pull request |
+| `loop-on-ci` | Monitor PR checks and fix failures until green. Uses gh pr checks as the source of truth for PR-attached checks. |
+| `make-pr-easy-to-review` | Prepare PRs for review by cleaning noisy history, improving PR descriptions, and adding reviewer guidance without changing code behavior. Use for "make this easy to review", "tidy this PR", "clean up commits", or "annotate the diff". |
+| `new-branch-and-pr` | Create a fresh branch, complete work, and open a pull request |
+| `pr-review-canvas` | Generate an interactive PR review walkthrough as an HTML page. Fetches PR data via gh API, categorizes files into core vs mechanical changes, adds reviewer annotations, and renders diffs with moved-code detection. Use when the user pastes a GitHub PR URL and asks for a review, walkthrough, or summary, or says "review this PR". |
+| `review-and-ship` | Review the current branch for bugs, intent fit, and test coverage; run or write tests; commit focused work; open or update a PR. |
+| `run-smoke-tests` | Run Playwright smoke tests, debug failures, and verify fixes |
+| `thermo-nuclear-code-quality-review` | Run an extremely strict maintainability review for abstraction quality, giant files, and spaghetti-condition growth. Use for a thermo-nuclear code quality review, thermonuclear review, deep code quality audit, or especially harsh maintainability review. |
+| `verify-this` | Verify a claim with fresh local evidence: restate it falsifiably, capture baseline and treatment, compare artifacts, and return VERIFIED, NOT VERIFIED, or INCONCLUSIVE. |
+| `weekly-review` | Produce a weekly synthesis of authored commits with highlights by bugfix, tech debt, and net-new work |
+| `what-did-i-get-done` | Summarize authored commits over a user-specified time period into a concise update |
+| `workflow-from-chats` | Extract durable working preferences from recent Cursor chats and convert them into skills, rules, or workflow docs. Use when asked to learn preferences, mine feedback, personalize workflows, or generate team/person-specific agent guidance. |
+
+## Vercel Agent Skills
+
+Source: [`vercel-labs/agent-skills`](https://github.com/vercel-labs/agent-skills) · v063bee9 · Official Vercel web, React, writing, and deploy skills.
+
+| Skill | Description |
+| --- | --- |
+| `vercel-composition-patterns` |  |
+| `deploy-to-vercel` | Deploy applications and websites to Vercel. Use when the user requests deployment actions like "deploy my app", "deploy and give me the link", "push this live", or "create a preview deployment". |
+| `vercel-react-best-practices` | React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements. |
+| `vercel-react-native-skills` |  |
+| `vercel-react-view-transitions` | Guide for implementing smooth, native-feeling animations using React's View Transition API (`<ViewTransition>` component, `addTransitionType`, and CSS view transition pseudo-elements). Use this skill whenever the user wants to add page transitions, animate route changes, create shared element animations, animate enter/exit of components, animate list reorder, implement directional (forward/back) navigation animations, or integrate view transitions in Next.js. Also use when the user mentions view transitions, `startViewTransition`, `ViewTransition`, transition types, or asks about animating between UI states in React without third-party animation libraries. |
+| `vercel-cli-with-tokens` | Deploy and manage projects on Vercel using token-based authentication. Use when working with Vercel CLI using access tokens rather than interactive login — e.g. "deploy to vercel", "set up vercel", "add environment variables to vercel". |
+| `vercel-optimize` | Use for Vercel cost and performance optimization on deployed projects, especially Next.js, SvelteKit, Nuxt, and limited Astro apps. Collect Vercel metrics, usage, project config, and code scan results first; investigate only metric-backed candidates; produce ranked recommendations grounded in verified files and version-aware Vercel/framework docs. Trigger for Vercel bill reduction, slow or expensive routes, caching opportunities, Function Invocations, Build Minutes, Fast Data Transfer, Core Web Vitals, Bot Management, Fluid compute, or cost breakdown requests. |
+| `web-design-guidelines` | Review UI code for Web Interface Guidelines compliance. Use when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site against best practices". |
+| `writing-guidelines` | Review docs/prose for Writing Guidelines compliance. Use when asked to "review my docs", "check writing style", "audit prose", "review docs voice and tone", or "check this page against the writing handbook". |
+
+## Addy Osmani — Agent Skills
+
+Source: [`addyosmani/agent-skills`](https://github.com/addyosmani/agent-skills) · v0.6.8 · Production engineering skills across spec, build, test, review, and ship.
+
+| Skill | Description |
+| --- | --- |
+| `api-and-interface-design` | Guides stable API and interface design. Use when designing APIs, module boundaries, or any public interface. Use when creating REST or GraphQL endpoints, defining type contracts between modules, or establishing boundaries between frontend and backend. |
+| `browser-testing-with-devtools` | Tests in real browsers via Chrome DevTools MCP. Use when building or debugging anything that runs in a browser. Use when you need to inspect the DOM, capture console errors, analyze network requests, profile performance, or verify visual output with real runtime data. Requires the chrome-devtools MCP server to be configured. |
+| `ci-cd-and-automation` | Automates CI/CD pipeline setup. Use when setting up or modifying build and deployment pipelines. Use when you need to automate quality gates, configure test runners in CI, or establish deployment strategies. |
+| `code-review-and-quality` | Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch. |
+| `code-simplification` | Simplifies code for clarity. Use when refactoring code for clarity without changing behavior. Use when code works but is harder to read, maintain, or extend than it should be. Use when reviewing code that has accumulated unnecessary complexity. |
+| `constraint-driven-development` | Establishes a project's quality bar as a written contract and stops agents quietly lowering it. Interviews the user on which dimensions matter, supplies sane default thresholds when they have no number in mind, records everything in CONSTRAINTS.md, and watches the diff for a weakened bar — new @ts-ignore or eslint-disable suppressions, skipped or deleted tests, assertions stripped out, unimplemented stubs, thresholds edited down. Use when no quality bar is written down, when the user says "set up constraints" or "define our standards", when an agent keeps silencing checks or skipping tests to get to green, when you need a coverage or performance threshold and don't know what number to pick, or when an agent writes more code than anyone will read. |
+| `context-engineering` | Optimizes agent context setup. Use when starting a new session, when agent output quality degrades, when switching between tasks, or when you need to configure rules files and context for a project. |
+| `debugging-and-error-recovery` | Guides systematic root-cause debugging. Use when tests fail, builds break, behavior doesn't match expectations, or you encounter any unexpected error. Use when you need a systematic approach to finding and fixing the root cause rather than guessing. |
+| `deprecation-and-migration` | Manages deprecation and migration. Use when removing old systems, APIs, or features. Use when migrating users from one implementation to another. Use when deciding whether to maintain or sunset existing code. |
+| `documentation-and-adrs` | Records decisions and documentation. Use when making architectural decisions, changing public APIs, shipping features, or when you need to record context that future engineers and agents will need to understand the codebase. |
+| `doubt-driven-development` | Subjects every non-trivial decision to a fresh-context adversarial review before it stands. Use when correctness matters more than speed, when working in unfamiliar code, when stakes are high (production, security-sensitive logic, irreversible operations), or any time a confident output would be cheaper to verify now than to debug later. |
+| `frontend-ui-engineering` | Builds production-quality, accessible, responsive user-facing UIs. Use when building or modifying interfaces and pages, creating components, implementing layouts, meeting WCAG accessibility requirements, managing state, or when the output needs to look and feel production-quality rather than AI-generated. |
+| `git-workflow-and-versioning` | Structures git workflow practices. Use when making any code change. Use when committing, branching, resolving conflicts, opening or reviewing a pull request (PR), pushing to a remote, or when you need to organize work across multiple parallel streams. Use when cutting a release, choosing a semantic version bump, tagging, or writing a changelog. |
+| `idea-refine` | Refines raw ideas into sharp, actionable concepts through structured divergent and convergent thinking. Use when an idea is still vague, when you need to stress-test assumptions before committing to a plan, or when you want to expand options before converging on one. Triggers on "ideate", "refine this idea", or "stress-test my plan". |
+| `incremental-implementation` | Delivers changes incrementally. Use when implementing any feature or change that touches more than one file. Use when you're about to write a large amount of code at once, or when a task feels too big to land in one step. |
+| `interview-me` | Extracts what the user actually wants instead of what they think they should want. Achieves this through one-question-at-a-time interview until ~95% confidence about the underlying intent. Use when an ask is underspecified ("build me X" without "for whom" or "why now"), when the user explicitly invokes ("interview me", "grill me", "are we sure?", "stress-test my thinking"), or when you catch yourself silently filling in ambiguous requirements before any plan, spec, or code exists. |
+| `observability-and-instrumentation` | Instruments code so production behavior is visible and diagnosable. Use when adding logging, metrics, tracing, or alerting. Use when shipping any feature that runs in production and you need evidence it works. Use when production issues are reported but you can't tell what happened from the available data. |
+| `performance-optimization` | Optimizes application performance across frontend, backend, queries, and databases. Use when performance requirements exist, when you suspect performance regressions, when Core Web Vitals or load times need improvement, when N+1 query patterns need fixing, or when profiling reveals bottlenecks. |
+| `planning-and-task-breakdown` | Breaks work into ordered tasks. Use when you have a spec or clear requirements and need to break work into implementable tasks. Use when a task feels too large to start, when you need to estimate scope, or when parallel work is possible. |
+| `security-and-hardening` | Hardens code against vulnerabilities. Use when handling user input, authentication, data storage, or external integrations. Use when building any feature that accepts untrusted data, manages user sessions, or interacts with third-party services. Use when personal data or privacy compliance (GDPR, CCPA) is involved. |
+| `shipping-and-launch` | Prepares production launches. Use when preparing to deploy to production. Use when you need a pre-launch checklist, when setting up monitoring, when planning a staged rollout, or when you need a rollback strategy. |
+| `source-driven-development` | Grounds every implementation decision in official documentation. Use when you want authoritative, source-cited code free from outdated patterns. Use when building with any framework or library where correctness matters. |
+| `spec-driven-development` | Creates specs before coding. Use when starting a new project, feature, or significant change and no specification exists yet. Use when requirements are unclear, ambiguous, or only exist as a vague idea. Use when a single requirement spans several independently testable capabilities and needs decomposing into a capability map of modules before specifying. |
+| `test-driven-development` | Drives development with tests. Use when implementing any logic, fixing any bug, or changing any behavior. Use when you need to prove that code works, when a bug report arrives, or when you're about to modify existing functionality. |
+| `using-agent-skills` | Discovers and invokes agent skills. Use when starting a session or when you need to discover which skill applies to the current task. This is the meta-skill that governs how all other skills are discovered and invoked. |
 
 ---
 
-**Total: 162 skills across 4 packs.**
+**Total: 208 skills across 8 packs.**
 
 ## Recommended for this project
 
@@ -205,13 +279,15 @@ code-review tool). The following vendored skills map directly to its needs:
 
 | Project need | Use these skills |
 | --- | --- |
-| Security review (OWASP/STRIDE, injection, headers) | `gstack/cso`, `pstack/thermo-nuclear-code-quality-review`, `gstack/review` |
-| Code review before merge | `mattpocock/code-review`, `superpowers/requesting-code-review`, `superpowers/receiving-code-review`, `pstack/make-pr-easy-to-review` |
-| Testing (the repo uses Jest) | `superpowers/test-driven-development`, `mattpocock/tdd`, `pstack/tdd` |
+| Full-repo audit and execution plans | `improve/improve` |
+| Security review (OWASP/STRIDE, injection, headers) | `gstack/cso`, `addyosmani/security-and-hardening`, `gstack/review` |
+| Code review before merge | `mattpocock/code-review`, `addyosmani/code-review-and-quality`, `superpowers/requesting-code-review`, `cursor-team-kit/make-pr-easy-to-review` |
+| Testing (the repo uses Jest) | `superpowers/test-driven-development`, `mattpocock/tdd`, `addyosmani/test-driven-development` |
 | Debugging server/API issues | `superpowers/systematic-debugging`, `mattpocock/diagnosing-bugs`, `gstack/investigate` |
-| Fixing CI / merge conflicts | `pstack/fix-ci`, `pstack/fix-merge-conflicts` |
-| QA of the web UI | `gstack/qa`, `gstack/qa-only` |
-| Planning & shipping features | `superpowers/writing-plans`, `superpowers/executing-plans`, `gstack/ship` |
+| Fixing CI / merge conflicts | `cursor-team-kit/fix-ci`, `cursor-team-kit/fix-merge-conflicts`, `cursor-team-kit/loop-on-ci` |
+| QA of the web UI | `gstack/qa`, `gstack/qa-only`, `addyosmani/browser-testing-with-devtools` |
+| Planning and shipping | `superpowers/writing-plans`, `superpowers/executing-plans`, `gstack/ship`, `addyosmani/shipping-and-launch` |
+| UI and copy review | `vercel-agent-skills/web-design-guidelines`, `vercel-agent-skills/writing-guidelines` |
 
 ### Complementary Cursor tooling (enable in the Cursor UI)
 

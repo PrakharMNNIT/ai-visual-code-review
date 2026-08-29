@@ -1,7 +1,6 @@
 ---
 name: typescript-best-practices
 description: TypeScript best practices. Use when reading or editing any .ts or .tsx file.
-menu-description: ground type-system discipline in TypeScript syntax
 ---
 
 # TypeScript best practices

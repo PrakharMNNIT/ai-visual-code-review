@@ -14,10 +14,56 @@ const SKILLS_DIR = path.join(ROOT, '.claude', 'skills');
 const OUT = path.join(ROOT, 'docs', 'agent-skills.md');
 
 const PACK_META = {
-  superpowers: { title: 'Superpowers', source: 'obra/superpowers', version: '6.3.0', note: 'Composable SDLC methodology skills.' },
-  mattpocock: { title: 'Matt Pocock — Skills for Real Engineers', source: 'mattpocock/skills', version: '1.2.3', note: 'Engineering & productivity skills.' },
-  gstack: { title: 'gstack (Garry Tan)', source: 'garrytan/gstack', version: '1.69.0.0', note: 'Role-based "virtual engineering team" skills (slimmed: Markdown only).' },
-  pstack: { title: 'pstack (Lauren Tan / poteto)', source: 'michael-denyer/pstack-claude', version: '0.9.14', note: 'Rigorous agent workflow skills (Claude Code/Codex port of poteto\'s pstack).' },
+  superpowers: {
+    title: 'Superpowers',
+    source: 'obra/superpowers',
+    version: '6.3.0',
+    note: 'Composable SDLC methodology skills.'
+  },
+  mattpocock: {
+    title: 'Matt Pocock — Skills for Real Engineers',
+    source: 'mattpocock/skills',
+    version: '1.2.3',
+    note: 'Engineering and productivity skills.'
+  },
+  gstack: {
+    title: 'gstack (Garry Tan)',
+    source: 'garrytan/gstack',
+    version: '1.72.0.0',
+    note: 'Role-based virtual engineering team skills (slimmed: Markdown plus skill scripts).'
+  },
+  pstack: {
+    title: 'pstack (Lauren Tan / poteto)',
+    source: 'cursor/plugins',
+    tree: 'pstack',
+    version: '0.14.5',
+    note: 'Official Cursor pstack. Rigorous agent workflow skills.'
+  },
+  improve: {
+    title: 'improve (shadcn)',
+    source: 'shadcn/improve',
+    version: '03369ee',
+    note: 'Audits a codebase and writes execution plans. Does not implement the plans itself.'
+  },
+  'cursor-team-kit': {
+    title: 'Cursor Team Kit',
+    source: 'cursor/plugins',
+    tree: 'cursor-team-kit',
+    version: '1.2.0',
+    note: 'Cursor internal CI, review, shipping, and verification workflows.'
+  },
+  'vercel-agent-skills': {
+    title: 'Vercel Agent Skills',
+    source: 'vercel-labs/agent-skills',
+    version: '063bee9',
+    note: 'Official Vercel web, React, writing, and deploy skills.'
+  },
+  addyosmani: {
+    title: 'Addy Osmani — Agent Skills',
+    source: 'addyosmani/agent-skills',
+    version: '0.6.8',
+    note: 'Production engineering skills across spec, build, test, review, and ship.'
+  }
 };
 
 function readFrontmatter(file) {
@@ -46,23 +92,34 @@ function findSkills(packDir) {
   return results.sort();
 }
 
+function sourceLink(meta) {
+  const href = meta.tree
+    ? `https://github.com/${meta.source}/tree/main/${meta.tree}`
+    : `https://github.com/${meta.source}`;
+  const label = meta.tree ? `${meta.source}/${meta.tree}` : meta.source;
+  return `[\`${label}\`](${href})`;
+}
+
 let md = '# Agent Skills\n\n';
 md += 'Vendored agent-skill packs, installed into both `.claude/skills/` (Claude Code, Cursor) ';
 md += 'and `.agents/skills/` (Codex, Prime Agent). Skills are discovered automatically by ';
-md += 'compatible agents via the [Agent Skills standard](https://skills.sh).\n\n';
-md += '> Slimmed install: only `SKILL.md` files and their Markdown references are vendored. ';
+md += 'compatible agents via the [Agent Skills standard](https://agentskills.io).\n\n';
+md += '> Slimmed install: `SKILL.md`, Markdown references, and each skill\'s `scripts/` directory. ';
 md += 'Refresh with `./scripts/install-agent-skills.sh` then `node scripts/gen-skills-index.js`. ';
-md += 'All packs are MIT licensed; each pack directory keeps its upstream `LICENSE`.\n\n';
+md += 'Packs keep their upstream LICENSE when the clone has one. Why these packs, and which ';
+md += 'ones were skipped: [`docs/agent-skill-packs.md`](agent-skill-packs.md).\n\n';
 
 let total = 0;
+let present = 0;
 for (const pack of Object.keys(PACK_META)) {
   const dir = path.join(SKILLS_DIR, pack);
   if (!fs.existsSync(dir)) continue;
+  present += 1;
   const meta = PACK_META[pack];
   const skills = findSkills(dir);
   total += skills.length;
   md += `## ${meta.title}\n\n`;
-  md += `Source: [\`${meta.source}\`](https://github.com/${meta.source}) · v${meta.version} · MIT · ${meta.note}\n\n`;
+  md += `Source: ${sourceLink(meta)} · v${meta.version} · ${meta.note}\n\n`;
   md += '| Skill | Description |\n| --- | --- |\n';
   for (const s of skills) {
     const fm = readFrontmatter(s);
@@ -73,19 +130,21 @@ for (const pack of Object.keys(PACK_META)) {
   md += '\n';
 }
 
-md += `---\n\n**Total: ${total} skills across ${Object.keys(PACK_META).length} packs.**\n\n`;
+md += `---\n\n**Total: ${total} skills across ${present} packs.**\n\n`;
 
 md += '## Recommended for this project\n\n';
 md += 'This project is a Node.js/Express web app (a security-hardened visual git\n';
 md += 'code-review tool). The following vendored skills map directly to its needs:\n\n';
 md += '| Project need | Use these skills |\n| --- | --- |\n';
-md += '| Security review (OWASP/STRIDE, injection, headers) | `gstack/cso`, `pstack/thermo-nuclear-code-quality-review`, `gstack/review` |\n';
-md += '| Code review before merge | `mattpocock/code-review`, `superpowers/requesting-code-review`, `superpowers/receiving-code-review`, `pstack/make-pr-easy-to-review` |\n';
-md += '| Testing (the repo uses Jest) | `superpowers/test-driven-development`, `mattpocock/tdd`, `pstack/tdd` |\n';
+md += '| Full-repo audit and execution plans | `improve/improve` |\n';
+md += '| Security review (OWASP/STRIDE, injection, headers) | `gstack/cso`, `addyosmani/security-and-hardening`, `gstack/review` |\n';
+md += '| Code review before merge | `mattpocock/code-review`, `addyosmani/code-review-and-quality`, `superpowers/requesting-code-review`, `cursor-team-kit/make-pr-easy-to-review` |\n';
+md += '| Testing (the repo uses Jest) | `superpowers/test-driven-development`, `mattpocock/tdd`, `addyosmani/test-driven-development` |\n';
 md += '| Debugging server/API issues | `superpowers/systematic-debugging`, `mattpocock/diagnosing-bugs`, `gstack/investigate` |\n';
-md += '| Fixing CI / merge conflicts | `pstack/fix-ci`, `pstack/fix-merge-conflicts` |\n';
-md += '| QA of the web UI | `gstack/qa`, `gstack/qa-only` |\n';
-md += '| Planning & shipping features | `superpowers/writing-plans`, `superpowers/executing-plans`, `gstack/ship` |\n\n';
+md += '| Fixing CI / merge conflicts | `cursor-team-kit/fix-ci`, `cursor-team-kit/fix-merge-conflicts`, `cursor-team-kit/loop-on-ci` |\n';
+md += '| QA of the web UI | `gstack/qa`, `gstack/qa-only`, `addyosmani/browser-testing-with-devtools` |\n';
+md += '| Planning and shipping | `superpowers/writing-plans`, `superpowers/executing-plans`, `gstack/ship`, `addyosmani/shipping-and-launch` |\n';
+md += '| UI and copy review | `vercel-agent-skills/web-design-guidelines`, `vercel-agent-skills/writing-guidelines` |\n\n';
 md += '### Complementary Cursor tooling (enable in the Cursor UI)\n\n';
 md += '- **CodeRabbit** — deep automated code review (`code-review` skill / `code-reviewer` agent). Requires a `CODERABBIT_API_KEY` secret to run non-interactively in Cloud Agents.\n';
 md += '- **Security Review** and **Bugbot** agents — on-demand security and bug review of local changes.\n';
