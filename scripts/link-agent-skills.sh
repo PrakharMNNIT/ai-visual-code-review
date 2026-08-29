@@ -34,7 +34,22 @@ link_packs() {
   done
 }
 
+# pstack reads ~/.cursor/rules/pstack-models.mdc. Cloud Agent homes are
+# ephemeral, so copy the repo-pinned map on every environment boot.
+install_pstack_models() {
+  local src="$REPO_ROOT/.cursor/rules/pstack-models.mdc"
+  local dest_dir="$HOME_DIR/.cursor/rules"
+  if [ ! -f "$src" ]; then
+    echo "link-agent-skills: no $src, skipping pstack models"
+    return 0
+  fi
+  mkdir -p "$dest_dir"
+  cp "$src" "$dest_dir/pstack-models.mdc"
+  echo "link-agent-skills: installed $dest_dir/pstack-models.mdc"
+}
+
 link_packs "$REPO_ROOT/.claude/skills"  "$HOME_DIR/.claude/skills"
 link_packs "$REPO_ROOT/.agents/skills" "$HOME_DIR/.agents/skills"
+install_pstack_models
 
 echo "link-agent-skills: done"

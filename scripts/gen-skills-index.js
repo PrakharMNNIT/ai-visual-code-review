@@ -63,6 +63,42 @@ const PACK_META = {
     source: 'addyosmani/agent-skills',
     version: '0.6.8',
     note: 'Production engineering skills across spec, build, test, review, and ship.'
+  },
+  'find-skills': {
+    title: 'find-skills (Vercel Labs)',
+    source: 'vercel-labs/skills',
+    version: '1.5.23',
+    note: 'Skill #0 / discovery. On-demand lookup, not an always-on personality.'
+  },
+  trailofbits: {
+    title: 'Trail of Bits',
+    source: 'trailofbits/skills',
+    version: 'd1f1575',
+    note: 'Security research, review, and audit skills. Discover on demand; do not always-apply every skill.'
+  },
+  'agent-browser': {
+    title: 'agent-browser',
+    source: 'vercel-labs/agent-browser',
+    version: '0.35.1',
+    note: 'Browser automation CLI skill for agents. Pair with the optional agent-browser binary.'
+  },
+  'compound-engineering': {
+    title: 'Compound Engineering',
+    source: 'EveryInc/compound-engineering-plugin',
+    version: '2.42.0',
+    note: 'Learn/compound layer. Do not run CE with gstack, Superpowers, and pstack on the same task.'
+  },
+  anthropics: {
+    title: 'Anthropic example skills (subset)',
+    source: 'anthropics/skills',
+    version: '3b3fad9',
+    note: 'frontend-design, webapp-testing, mcp-builder, skill-creator, claude-api only. No pptx/xlsx/docx/art/branding/gifs.'
+  },
+  'awesome-copilot': {
+    title: 'Awesome Copilot (GitHub workflow subset)',
+    source: 'github/awesome-copilot',
+    version: 'f11a4e4',
+    note: 'Issue, PR, Actions, and gh workflow skills only. Upstream is 400+ skills; this repo vendors a documented subset.'
   }
 };
 
@@ -136,15 +172,19 @@ md += '## Recommended for this project\n\n';
 md += 'This project is a Node.js/Express web app (a security-hardened visual git\n';
 md += 'code-review tool). The following vendored skills map directly to its needs:\n\n';
 md += '| Project need | Use these skills |\n| --- | --- |\n';
+md += '| Discover which skill applies | `find-skills/find-skills` |\n';
 md += '| Full-repo audit and execution plans | `improve/improve` |\n';
-md += '| Security review (OWASP/STRIDE, injection, headers) | `gstack/cso`, `addyosmani/security-and-hardening`, `gstack/review` |\n';
+md += '| Security review (on demand) | `trailofbits/*`, `gstack/cso`, `addyosmani/security-and-hardening` |\n';
 md += '| Code review before merge | `mattpocock/code-review`, `addyosmani/code-review-and-quality`, `superpowers/requesting-code-review`, `cursor-team-kit/make-pr-easy-to-review` |\n';
 md += '| Testing (the repo uses Jest) | `superpowers/test-driven-development`, `mattpocock/tdd`, `addyosmani/test-driven-development` |\n';
 md += '| Debugging server/API issues | `superpowers/systematic-debugging`, `mattpocock/diagnosing-bugs`, `gstack/investigate` |\n';
 md += '| Fixing CI / merge conflicts | `cursor-team-kit/fix-ci`, `cursor-team-kit/fix-merge-conflicts`, `cursor-team-kit/loop-on-ci` |\n';
-md += '| QA of the web UI | `gstack/qa`, `gstack/qa-only`, `addyosmani/browser-testing-with-devtools` |\n';
+md += '| QA of the web UI | `agent-browser/agent-browser`, `gstack/qa`, `anthropics/webapp-testing` |\n';
 md += '| Planning and shipping | `superpowers/writing-plans`, `superpowers/executing-plans`, `gstack/ship`, `addyosmani/shipping-and-launch` |\n';
-md += '| UI and copy review | `vercel-agent-skills/web-design-guidelines`, `vercel-agent-skills/writing-guidelines` |\n\n';
+md += '| UI craft | `anthropics/frontend-design`, `vercel-agent-skills/web-design-guidelines` |\n';
+md += '| GitHub issues / PRs | `awesome-copilot/github-issues`, `mattpocock/triage` |\n';
+md += '| Compound after ship | `compound-engineering/ce-compound` (not on the same task as gstack, Superpowers, or pstack) |\n\n';
+md += 'Pick **one** spec/implement methodology per task. Do not run gstack, Superpowers, pstack, and Compound Engineering together.\n\n';
 md += '### Complementary Cursor tooling (enable in the Cursor UI)\n\n';
 md += '- **CodeRabbit** — deep automated code review (`code-review` skill / `code-reviewer` agent). Requires a `CODERABBIT_API_KEY` secret to run non-interactively in Cloud Agents.\n';
 md += '- **Security Review** and **Bugbot** agents — on-demand security and bug review of local changes.\n';

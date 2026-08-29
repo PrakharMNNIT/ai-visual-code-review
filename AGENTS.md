@@ -17,7 +17,8 @@ Agent) and are discovered automatically by compatible agents.
 
 - Browse the full index of all skills and their triggers:
   [`docs/agent-skills.md`](docs/agent-skills.md).
-- Packs:
+- Packs (discover on demand, not always-on personality):
+  - `find-skills/` — skill discovery ([vercel-labs/skills](https://github.com/vercel-labs/skills) `find-skills` only)
   - `superpowers/` — SDLC methodology ([obra/superpowers](https://github.com/obra/superpowers))
   - `mattpocock/` — engineering skills ([mattpocock/skills](https://github.com/mattpocock/skills))
   - `gstack/` — virtual engineering team ([garrytan/gstack](https://github.com/garrytan/gstack))
@@ -26,13 +27,21 @@ Agent) and are discovered automatically by compatible agents.
   - `cursor-team-kit/` — Cursor CI, review, ship ([cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit))
   - `vercel-agent-skills/` — Vercel web and writing skills ([vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills))
   - `addyosmani/` — spec, build, test, review, ship ([addyosmani/agent-skills](https://github.com/addyosmani/agent-skills))
-- Why these packs, and which ones were skipped:
+  - `trailofbits/` — security skills, on demand ([trailofbits/skills](https://github.com/trailofbits/skills))
+  - `agent-browser/` — browser QA CLI skill ([vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser))
+  - `compound-engineering/` — learn/compound layer ([EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin))
+  - `anthropics/` — engineering subset ([anthropics/skills](https://github.com/anthropics/skills))
+  - `awesome-copilot/` — GitHub issue/PR/`gh` subset ([github/awesome-copilot](https://github.com/github/awesome-copilot))
+- Why these packs, which ones were skipped, and the one-methodology pipeline:
   [`docs/agent-skill-packs.md`](docs/agent-skill-packs.md).
 - Slimmed installs (`SKILL.md`, references, skill `scripts/`). Refresh with:
   `./scripts/install-agent-skills.sh && node scripts/gen-skills-index.js`.
+- pstack per-role models (Cursor Task slugs):
+  [`.cursor/rules/pstack-models.mdc`](.cursor/rules/pstack-models.mdc).
 
 When a task matches a skill's trigger description, read that skill's `SKILL.md`
-and follow it.
+and follow it. Do not run gstack, Superpowers, pstack, and Compound Engineering
+as four simultaneous methodologies on the same task.
 
 ### Issue tracker
 

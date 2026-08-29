@@ -56,6 +56,9 @@ module.exports = {
     'vscode-extension/',
     'coverage/',
     '*.min.js',
-    'public/index.html'
+    'public/index.html',
+    '.claude/',
+    '.agents/',
+    '.cursor/'
   ]
 };
