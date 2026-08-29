@@ -162,7 +162,7 @@ the home file is missing** (never clobber a user-owned MCP config).
         "serena",
         "start-mcp-server",
         "--context",
-        "ide-assistant",
+        "ide",
         "--project",
         "${workspaceFolder}"
       ]
@@ -176,7 +176,9 @@ the home file is missing** (never clobber a user-owned MCP config).
 ```
 
 No API keys are committed. Context7 works without a key; a
-`CONTEXT7_API_KEY` in the environment is optional. Serena indexes into
+`CONTEXT7_API_KEY` in the environment is optional. Serena `--context` is
+`ide` (built-in). There is no `ide-assistant` context in current Serena;
+that name was the user-facing request, mapped to `ide`. Serena indexes into
 `.serena/` (gitignored). Index with:
 
 ```

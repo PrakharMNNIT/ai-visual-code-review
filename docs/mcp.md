@@ -31,11 +31,13 @@ API docs that may have changed since training. Cursor rule:
   "args": [
     "--from", "git+https://github.com/oraios/serena",
     "serena", "start-mcp-server",
-    "--context", "ide-assistant",
+    "--context", "ide",
     "--project", "${workspaceFolder}"
   ]
 }
 ```
+
+Use `--context ide`. Serena's built-in list has `ide`, not `ide-assistant`.
 
 Semantic code intelligence for **this** tree. Optional index (not on boot):
 
