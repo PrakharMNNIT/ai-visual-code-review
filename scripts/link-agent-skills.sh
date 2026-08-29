@@ -34,11 +34,7 @@ link_packs() {
   done
 }
 
-# Cursor Cloud Task slugs live in the repo sheet. Copy them to the path
-# pstack skills read (~/.claude/pstack-models.md) and append the CLAUDE.md
-# include. Skip when CURSOR_AGENT is unset so a local Claude Code home
-# keeps its own override.
-install_pstack_models() {
+install_pstack_models_on_cursor_cloud() {
   local src="$REPO_ROOT/.cursor/pstack-models.md"
   local dest="$HOME_DIR/.claude/pstack-models.md"
   local claude_md="$HOME_DIR/.claude/CLAUDE.md"
@@ -69,6 +65,6 @@ install_pstack_models() {
 
 link_packs "$REPO_ROOT/.claude/skills"  "$HOME_DIR/.claude/skills"
 link_packs "$REPO_ROOT/.agents/skills" "$HOME_DIR/.agents/skills"
-install_pstack_models
+install_pstack_models_on_cursor_cloud
 
 echo "link-agent-skills: done"
