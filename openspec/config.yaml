@@ -1,0 +1,14 @@
+schema: spec-driven
+
+# Shown to AI when creating OpenSpec artifacts.
+context: |
+  Repo: praxstack/ai-visual-code-review
+  Stack: Node.js, Express, vanilla web UI (not Next.js / React Native)
+  Purpose: security-hardened visual git code-review tool
+  Install: npm ci
+  Dev server: npm start (http://localhost:3002)
+  Tests: npm test · Lint: npm run lint
+  Commits: conventional commits (type(scope): description)
+  OpenSpec is the default WHAT/change layer. Spec Kit stays for heavyweight
+  greenfield only. Execution engine is pstack XOR Superpowers XOR gstack.
+  Compound Engineering is the learn/compound layer after a run.

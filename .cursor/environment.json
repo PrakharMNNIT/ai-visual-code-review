@@ -1,6 +1,6 @@
 {
   "name": "AI Visual Code Review",
-    "install": "npm ci && bash scripts/link-agent-skills.sh && bash scripts/link-praxstack-skills.sh && bash scripts/install-agent-browser.sh",
+  "install": "npm ci && bash scripts/install-cursor-native-stack.sh",
   "terminals": [
     {
       "name": "server",

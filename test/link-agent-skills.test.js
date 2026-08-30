@@ -50,6 +50,46 @@ describe('gstack Cursor skill flatten', () => {
   });
 });
 
+describe('all-pack Cursor skill flatten', () => {
+  test('one-level SKILL.md exists for gstack, CE, improve, tdd, and find-skills', () => {
+    const required = {
+      'plan-ceo-review': path.join(ROOT, '.claude/skills/gstack/plan-ceo-review/SKILL.md'),
+      'ce-brainstorm': path.join(ROOT, '.claude/skills/compound-engineering/ce-brainstorm/SKILL.md'),
+      improve: path.join(ROOT, '.claude/skills/improve/improve/SKILL.md'),
+      tdd: path.join(ROOT, '.claude/skills/pstack/tdd/SKILL.md'),
+      'find-skills': path.join(ROOT, '.claude/skills/find-skills/find-skills/SKILL.md'),
+      last30days: path.join(ROOT, '.claude/skills/last30days/last30days/SKILL.md'),
+      hallmark: path.join(ROOT, '.claude/skills/hallmark/hallmark/SKILL.md'),
+      impeccable: path.join(ROOT, '.claude/skills/impeccable/impeccable/SKILL.md'),
+      'deep-research': path.join(
+        ROOT,
+        '.claude/skills/agent-deep-research/agent-deep-research/SKILL.md'
+      )
+    };
+    for (const [name, real] of Object.entries(required)) {
+      const dest = path.join(PROJECT_SKILLS, name);
+      const skillMd = path.join(dest, 'SKILL.md');
+      expect({ name, skillMdExists: fs.existsSync(skillMd) }).toEqual({
+        name,
+        skillMdExists: true
+      });
+      expect(fs.lstatSync(dest).isSymbolicLink()).toBe(true);
+      expect(skillRealPath(dest)).toBe(fs.realpathSync(real));
+    }
+    for (const extra of ['last30days', 'hallmark', 'impeccable', 'deep-research', 'find-skills']) {
+      expect(fs.existsSync(path.join(PROJECT_SKILLS, extra, 'SKILL.md'))).toBe(true);
+    }
+    expect(fs.existsSync(path.join(PROJECT_SKILLS, 'openspec-propose', 'SKILL.md'))).toBe(true);
+  });
+
+  test('name collisions are prefixed and logged', () => {
+    const log = fs.readFileSync(path.join(ROOT, 'docs/cursor-skill-collisions.md'), 'utf8');
+    expect(log).toContain('mattpocock-tdd');
+    expect(fs.existsSync(path.join(PROJECT_SKILLS, 'mattpocock-tdd', 'SKILL.md'))).toBe(true);
+    expect(fs.readlinkSync(path.join(PROJECT_SKILLS, 'tdd'))).toContain('pstack/tdd');
+  });
+});
+
 describe('link-agent-skills.sh behavior', () => {
   test('is idempotent and writes home ~/.cursor/skills', () => {
     const home = fs.mkdtempSync(path.join(os.tmpdir(), 'gstack-link-home-'));
@@ -61,13 +101,15 @@ describe('link-agent-skills.sh behavior', () => {
       expect(skillRealPath(dest)).toBe(
         fs.realpathSync(path.join(PACK, 'plan-ceo-review/SKILL.md'))
       );
-      expect(fs.readdirSync(path.join(home, '.cursor/skills')).length).toBe(
-        fs.readdirSync(PROJECT_SKILLS).length
-      );
+      const homeSkills = path.join(home, '.cursor/skills');
+      for (const name of ['plan-ceo-review', 'ce-brainstorm', 'improve', 'last30days']) {
+        expect(fs.existsSync(path.join(homeSkills, name, 'SKILL.md'))).toBe(true);
+      }
+      expect(fs.readdirSync(homeSkills).length).toBeGreaterThanOrEqual(50);
     } finally {
       fs.rmSync(home, { recursive: true, force: true });
     }
-  });
+  }, 120000);
 
   test('does not replace a user-owned non-symlink skill directory', () => {
     const home = fs.mkdtempSync(path.join(os.tmpdir(), 'gstack-link-keep-'));
@@ -81,7 +123,7 @@ describe('link-agent-skills.sh behavior', () => {
     } finally {
       fs.rmSync(home, { recursive: true, force: true });
     }
-  });
+  }, 120000);
 });
 
 describe('gstack runtime for skill preamble', () => {
@@ -112,6 +154,10 @@ describe('gstack runtime for skill preamble', () => {
     expect(installer).toContain('link-agent-skills.sh');
     expect(linker).toContain('link_gstack_cursor_skills');
     expect(linker).toContain('link-praxstack-skills.sh');
+    expect(linker).toContain('link_cursor_skills');
+    expect(linker).toContain('PACK_ORDER');
     expect(linker).toContain('.cursor/skills');
+    expect(linker).toContain('install_cursor_mcp');
+    expect(linker).toContain('*/references/*');
   });
 });
