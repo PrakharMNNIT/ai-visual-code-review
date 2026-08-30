@@ -1,0 +1,18 @@
+---
+description: Use Context7 for current library and framework docs that may have changed since training
+alwaysApply: false
+---
+
+# Context7 (user-approved MCP)
+
+When implementation depends on a library, framework, or API whose docs may
+have changed since model training (Express, Jest, Cursor APIs, OpenSpec,
+Graphify, Serena, npm packages, etc.), query **Context7** via the project
+MCP server in `.cursor/mcp.json` before inventing signatures.
+
+This server is **user-approved**, not an ad-hoc shadow MCP. Do not add
+other MCP servers without approval. Do not commit API keys; Context7
+runs without a key.
+
+Serena (same `mcp.json`) is for this repo's semantic code intelligence.
+Use Context7 for **upstream library docs**; use Serena for **this tree**.

@@ -98,6 +98,14 @@ dist
 AI_REVIEW.md
 code-reviews-*/
 
+# Agent / native-stack local artifacts (never commit secrets or indexes)
+.serena/
+graphify-out/
+.graphify/
+.cursor/mcp.local.json
+openspec/changes/
+openspec/specs/
+
 # OS generated files
 .DS_Store
 .DS_Store?

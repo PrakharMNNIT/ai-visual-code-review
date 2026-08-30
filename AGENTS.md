@@ -11,42 +11,51 @@ a Node.js/Express visual git code-review tool).
 
 ## Agent skills
 
-This repo vendors several agent-skill packs. They are installed in both
-`.claude/skills/` (Claude Code, Cursor) and `.agents/skills/` (Codex, Prime
-Agent) and are discovered automatically by compatible agents.
+This repo vendors agent-skill packs into `.claude/skills/` (Claude Code) and
+`.agents/skills/` (Codex, Prime Agent). Cursor slash discovery is **one-level
+only**, so `scripts/link-agent-skills.sh` flattens every pack into
+`.cursor/skills/<name>/SKILL.md`. That flatten is **discovery, not
+personality** — do not always-apply the catalog.
 
-- Browse the full index of all skills and their triggers:
-  [`docs/agent-skills.md`](docs/agent-skills.md).
-- Packs (discover on demand, not always-on personality):
-  - `find-skills/` — skill discovery ([vercel-labs/skills](https://github.com/vercel-labs/skills) `find-skills` only)
-  - `superpowers/` — SDLC methodology ([obra/superpowers](https://github.com/obra/superpowers))
-  - `mattpocock/` — engineering skills ([mattpocock/skills](https://github.com/mattpocock/skills))
-  - `gstack/` — virtual engineering team ([garrytan/gstack](https://github.com/garrytan/gstack))
-  - `pstack/` — official Cursor pstack ([cursor/plugins pstack](https://github.com/cursor/plugins/tree/main/pstack))
-  - `improve/` — codebase audit and plans ([shadcn/improve](https://github.com/shadcn/improve))
-  - `cursor-team-kit/` — Cursor CI, review, ship ([cursor-team-kit](https://github.com/cursor/plugins/tree/main/cursor-team-kit))
-  - `vercel-agent-skills/` — Vercel web and writing skills ([vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills))
-  - `addyosmani/` — spec, build, test, review, ship ([addyosmani/agent-skills](https://github.com/addyosmani/agent-skills))
-  - `trailofbits/` — security skills, on demand ([trailofbits/skills](https://github.com/trailofbits/skills))
-  - `agent-browser/` — browser QA CLI skill ([vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser))
-  - `compound-engineering/` — learn/compound layer ([EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin))
-  - `anthropics/` — engineering subset ([anthropics/skills](https://github.com/anthropics/skills))
-  - `awesome-copilot/` — full `skills/` toolbox ([github/awesome-copilot](https://github.com/github/awesome-copilot))
-  - `spec-kit/` — Spec Kit command skills, v1.0.1 ([github/spec-kit](https://github.com/github/spec-kit))
-  - `microsoft/` — documented engineering subset ([microsoft/skills](https://github.com/microsoft/skills))
-  - `aws/` — AWS core + specialized skills ([aws/agent-toolkit-for-aws](https://github.com/aws/agent-toolkit-for-aws))
-  - `cloudflare/` — Workers / Wrangler skills ([cloudflare/skills](https://github.com/cloudflare/skills))
-  - `supabase/` — Supabase / Postgres / RLS ([supabase/agent-skills](https://github.com/supabase/agent-skills))
-- Why these packs, which ones were skipped, and the one-methodology pipeline:
-  [`docs/agent-skill-packs.md`](docs/agent-skill-packs.md).
-- Slimmed installs (`SKILL.md`, references, skill `scripts/`). Refresh with:
-  `./scripts/install-agent-skills.sh && node scripts/gen-skills-index.js`.
-- pstack per-role models (Cursor Task slugs):
-  [`.cursor/rules/pstack-models.mdc`](.cursor/rules/pstack-models.mdc).
+- Full index: [`docs/agent-skills.md`](docs/agent-skills.md).
+- Why these packs, XOR pipeline, bookmarks: [`docs/agent-skill-packs.md`](docs/agent-skill-packs.md).
+- Collisions (same `name:` in two packs): [`docs/cursor-skill-collisions.md`](docs/cursor-skill-collisions.md).
+- Refresh vendor: `./scripts/install-agent-skills.sh && node scripts/gen-skills-index.js`.
+- Cloud Agent boot: `npm ci && bash scripts/install-cursor-native-stack.sh`.
+- pstack Task slugs: [`.cursor/rules/pstack-models.mdc`](.cursor/rules/pstack-models.mdc).
 
-When a task matches a skill's trigger description, read that skill's `SKILL.md`
-and follow it. Do not run gstack, Superpowers, pstack, and Compound Engineering
-as four simultaneous methodologies on the same task.
+### Methodology XOR (one conductor per task)
+
+Do **not** run gstack, Superpowers, pstack, and Compound Engineering as
+simultaneous always-on conductors.
+
+| Role | Pick one |
+| --- | --- |
+| Spec / change | **OpenSpec (default)** · Spec Kit (huge greenfield only) · gstack spec · CE spec |
+| Implement | **pstack** (native Cursor) · Superpowers · gstack implement |
+| Learn after a run | Compound Engineering (`ce-compound`) |
+
+pstack is native Cursor execution. gstack `./setup --host cursor` works from a
+**full** clone (this VM: bun 1.4.0; help omits `cursor` but the parser
+accepts it). The slim vendored tree lacks
+`scripts/resolve-codex-generation-model.ts`, so do not run `./setup` from
+`.claude/skills/gstack`. Flatten remains the project Cursor discovery path.
+Superpowers is disciplined engineering. CE is organizational learning, not a
+fourth parallel methodology.
+
+### 2026 high-signal layers
+
+- **OpenSpec** — default spec/change layer (`openspec/`). See [`docs/openspec.md`](docs/openspec.md).
+- **Spec Kit** — vendored templates only; never `specify init` into this Express app.
+- **Graphify** — optional knowledge graph (`graphifyy` / `graphify`). See [`docs/graphify.md`](docs/graphify.md).
+- **Serena + Context7** — the only approved MCP servers. See [`docs/mcp.md`](docs/mcp.md).
+- **last30days** — recency radar. Treat hits as **leads, not evidence**; verify independently.
+- **agent-deep-research** (`24601/agent-deep-research` only) — not other forks.
+- **Hallmark** — taste / anti-slop gate. **Impeccable** — design engineering. Complementary, not XOR with each other; neither replaces gstack/pstack.
+- **web-design-guidelines** — pinned copy of `vercel-labs/web-interface-guidelines` (do not fetch mutable `main`).
+
+Specialist racks (wshobson/agents, everything-claude-code, NVIDIA/Remotion/etc.)
+are **bookmark-only**. See the packs doc.
 
 ### Issue tracker
 
