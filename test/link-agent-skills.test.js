@@ -153,6 +153,7 @@ describe('gstack runtime for skill preamble', () => {
     expect(installer).toContain('copy_gstack_runtime');
     expect(installer).toContain('link-agent-skills.sh');
     expect(linker).toContain('link_gstack_cursor_skills');
+    expect(linker).toContain('link-praxstack-skills.sh');
     expect(linker).toContain('link_cursor_skills');
     expect(linker).toContain('PACK_ORDER');
     expect(linker).toContain('.cursor/skills');

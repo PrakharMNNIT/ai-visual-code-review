@@ -57,6 +57,26 @@ fourth parallel methodology.
 Specialist racks (wshobson/agents, everything-claude-code, NVIDIA/Remotion/etc.)
 are **bookmark-only**. See the packs doc.
 
+### Prax's skills-and-personas
+
+Prax's own rack (goals, skills, personas, setup workflows) from
+[`praxstack/skills-and-personas`](https://github.com/praxstack/skills-and-personas).
+On-demand personal OS — not a fifth conductor next to gstack / Superpowers /
+pstack / Compound Engineering.
+
+- Skills: `.claude/skills/praxstack/` and `.agents/skills/praxstack/` (canonical
+  `new-skills/` portfolio plus slim `teach-pro-max`, `superimprove`,
+  `coding-agent-leadership-principles`, `cross-agent-handoff`).
+- Cursor slash discovery: flattened `.cursor/skills/<name>/` via
+  `scripts/link-praxstack-skills.sh` (for example `/kingmode`, `/apex-autonomous-mode`).
+- Personas / constellation agents: `.cursor/agents/`, `.claude/agents/`,
+  `.codex/agents/` — invoke when the role matches; do not always-apply.
+- Goals: no Cursor Goal files in upstream. Use `apex-autonomous-mode` /
+  `autonomous-orchestrion`, or paste prompts from
+  `.claude/skills/praxstack/workflows/high-end-operator/`.
+- Catalog and install notes: [`docs/agents/praxstack-skills-and-personas.md`](docs/agents/praxstack-skills-and-personas.md).
+  Mental-health skill scope: pack `SAFETY.md`.
+
 ### Issue tracker
 
 GitHub Issues for `praxstack/ai-visual-code-review` via the `gh` CLI. See `docs/agents/issue-tracker.md`.

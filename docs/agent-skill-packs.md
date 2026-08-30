@@ -66,6 +66,7 @@ not a substitute for that bar.
 | AWS | [aws/agent-toolkit-for-aws](https://github.com/aws/agent-toolkit-for-aws) | `skills/` core + specialized (Apache-2.0). Layout confirmed: `skills/core-skills` and `skills/specialized-skills`. |
 | Cloudflare | [cloudflare/skills](https://github.com/cloudflare/skills) | Workers, Wrangler, Durable Objects, and related (Apache-2.0). |
 | Supabase | [supabase/agent-skills](https://github.com/supabase/agent-skills) | Backend, Postgres, RLS (MIT). |
+| Prax skills-and-personas | [praxstack/skills-and-personas](https://github.com/praxstack/skills-and-personas) | Prax's **personal OS / personas rack**. On-demand. Not a fifth methodology conductor. See [`docs/agents/praxstack-skills-and-personas.md`](agents/praxstack-skills-and-personas.md). |
 | last30days | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) | Recency radar. **Leads, not evidence.** Verify independently. |
 | agent-deep-research | [24601/agent-deep-research](https://github.com/24601/agent-deep-research) | One deep-research pack only. |
 | Hallmark | [nutlope/hallmark](https://github.com/nutlope/hallmark) | Taste / anti-slop gate. |
@@ -304,6 +305,7 @@ Do not run `npx skills add ... --all`. Cloud Agents need the files in git.
 - [aws/agent-toolkit-for-aws](https://github.com/aws/agent-toolkit-for-aws) (Apache-2.0)
 - [cloudflare/skills](https://github.com/cloudflare/skills) (Apache-2.0)
 - [supabase/agent-skills](https://github.com/supabase/agent-skills) (MIT)
+- [praxstack/skills-and-personas](https://github.com/praxstack/skills-and-personas) (MIT; Prax personal OS)
 - [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) (MIT)
 - [24601/agent-deep-research](https://github.com/24601/agent-deep-research) (MIT)
 - [nutlope/hallmark](https://github.com/nutlope/hallmark) (MIT)

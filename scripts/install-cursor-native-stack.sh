@@ -47,6 +47,7 @@ if [ ! -f "$REPO_ROOT/.cursor/rules/graphify.mdc" ] && command -v graphify >/dev
 fi
 
 try "link-agent-skills" bash "$REPO_ROOT/scripts/link-agent-skills.sh"
+try "link-praxstack-skills" bash "$REPO_ROOT/scripts/link-praxstack-skills.sh"
 try "install-agent-browser" bash "$REPO_ROOT/scripts/install-agent-browser.sh"
 
 echo "native-stack: done"

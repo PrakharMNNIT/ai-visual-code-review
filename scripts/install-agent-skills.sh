@@ -20,6 +20,10 @@
 # into Agent Skills (constitution/specify/plan/tasks/implement plus the rest of
 # the command set). Do not run `specify init` in this Express app.
 #
+# praxstack is Prax's personal OS (praxstack/skills-and-personas). On-demand.
+# Not a fifth methodology conductor. Extras: scripts/vendor-praxstack-extras.sh
+# Cursor flatten: scripts/link-praxstack-skills.sh.
+#
 # OpenSpec (`openspec init`) is the default project-local spec/change layer.
 # Spec Kit stays vendored for heavyweight greenfield only.
 #
@@ -68,6 +72,7 @@ PACKS=(
   "aws|aws/agent-toolkit-for-aws|skills|LICENSE||"
   "cloudflare|cloudflare/skills|skills|LICENSE||"
   "supabase|supabase/agent-skills|skills|LICENSE||"
+  "praxstack|praxstack/skills-and-personas|new-skills|LICENSE||"
   "last30days|mvanhorn/last30days-skill|skills|LICENSE||"
   "agent-deep-research|24601/agent-deep-research|.|LICENSE||"
   "hallmark|nutlope/hallmark|skills|LICENSE||"
@@ -232,6 +237,22 @@ EOF
     supabase)
       cat > "$dest/NOTICE.md" <<'EOF'
 Supabase agent skills (backend, Postgres, RLS). MIT. Discover on demand.
+EOF
+      ;;
+    praxstack)
+      cat > "$dest/NOTICE.md" <<'EOF'
+Prax's personal OS / personas rack from praxstack/skills-and-personas (MIT).
+
+Canonical portfolio is new-skills/ (on-demand). Not a fifth methodology
+conductor — do not run this pack alongside gstack + Superpowers + pstack +
+Compound Engineering as another orchestrator. Invoke a matching skill
+(kingmode, constellation-team, backend-pe-nodejs, teach-pro-max, …).
+
+Public extras (slim): teach-pro-max, superimprove,
+coding-agent-leadership-principles, cross-agent-handoff.
+Personas live under personas/ and harness .claude/agents, .cursor/agents,
+.codex/agents — not alwaysApply rules. SAFETY.md covers the mental-health
+skill. Cursor flatten: scripts/link-praxstack-skills.sh.
 EOF
       ;;
     last30days)
@@ -530,6 +551,10 @@ extract_pack() {
       done
     fi
 
+    if [ "$pack" = "praxstack" ]; then
+      bash "$REPO_ROOT/scripts/vendor-praxstack-extras.sh" "$src" "$REPO_ROOT" "$dest"
+    fi
+
     echo "   $pack -> $base/$pack ($(find "$dest" -name SKILL.md | wc -l | tr -d ' ') skills)"
   done
 }
@@ -544,4 +569,6 @@ pin_web_design_guidelines
 
 echo "Flattening vendored skills for Cursor discovery..."
 bash "$REPO_ROOT/scripts/link-agent-skills.sh"
+echo "Flattening Prax skills-and-personas for Cursor discovery..."
+bash "$REPO_ROOT/scripts/link-praxstack-skills.sh"
 echo "Done. Regenerate the index with: node scripts/gen-skills-index.js"
